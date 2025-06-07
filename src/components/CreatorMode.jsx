@@ -34,7 +34,7 @@ export default function CreatorMode({ onComplete }) {
         const audioBlob = await audioResponse.blob();
         formData.append('audio', audioBlob, `${selectedCharacter.voice}-voice.mp3`);
 
-        const response = await fetch('http://localhost:5050/generate', {
+        const response = await fetch('https://deeplearn-backend.onrender.com/generate', {
           method: 'POST',
           body: formData,
         });

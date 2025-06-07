@@ -36,7 +36,7 @@ export default function PostSurvey({ onSubmit }) {
       q3
     };
     try {
-      await axios.post("/api/post-survey", payload);
+      await axios.post("https://deeplearn-backend.onrender.com/generate", payload);
       setSubmitted(true);
     } catch (err) {
       console.error("Post-survey submission failed:", err);

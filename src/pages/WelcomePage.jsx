@@ -27,7 +27,7 @@ export default function WelcomePage({ onStart, onExit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5050/api/welcome', {
+      await axios.post('https://deeplearn-backend.onrender.com/api/welcome', {
         userId,
         firstName,
         lastName,

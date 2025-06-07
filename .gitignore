@@ -35,6 +35,3 @@ Thumbs.db
 *.sublime-workspace
 *.sublime-project
 
-# Optional: prevent pushing videos or media
-public/videos/
-public/voices/
