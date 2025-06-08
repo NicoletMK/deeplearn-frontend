@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +9,7 @@ export default function WelcomePage({ onStart, onExit }) {
   const [grade, setGrade] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [userId, setUserId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('deeplearnUserId');
@@ -26,19 +26,22 @@ export default function WelcomePage({ onStart, onExit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
-      await axios.post('https://deeplearn-backend.onrender.com/api/save/welcome', {
+      await axios.post('https://deeplearn-backend.onrender.com/api/welcome', {
         userId,
         firstName,
         lastName,
         age,
         grade
       });
-
       onStart();
     } catch (err) {
       console.error('❌ Welcome data submission failed:', err);
       alert("There was a problem saving your info. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -134,12 +137,17 @@ export default function WelcomePage({ onStart, onExit }) {
               className="p-3 rounded-md border border-blue-300 focus:outline-none"
               required
             />
-            <button
-              type="submit"
-              className="bg-green-500 text-white font-bold py-3 rounded-md hover:bg-green-600 transition text-lg"
-            >
-              🚀 Get Started
-            </button>
+
+            {isLoading ? (
+              <div className="text-blue-600 font-semibold text-center animate-pulse">Saving your info...</div>
+            ) : (
+              <button
+                type="submit"
+                className="bg-green-500 text-white font-bold py-3 rounded-md hover:bg-green-600 transition text-lg"
+              >
+                🚀 Get Started
+              </button>
+            )}
           </form>
         </div>
       </div>
