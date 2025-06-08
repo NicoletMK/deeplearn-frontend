@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const characters = [
   { name: 'Raven', image: '/characters/Raven.png', voice: 'raven' },
@@ -39,11 +39,14 @@ export default function CreatorMode({ onComplete }) {
           body: formData,
         });
 
+        if (!response.ok) throw new Error('Failed to fetch');
+
         const data = await response.json();
         setGeneratedVideo(`${data.videoUrl}?t=${Date.now()}`);
         setShowModal(true);
       } catch (error) {
         console.error('Error generating video:', error);
+        alert('There was a problem generating the video. Please try again.');
       } finally {
         setLoading(false);
       }
