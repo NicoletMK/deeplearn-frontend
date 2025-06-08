@@ -35,7 +35,7 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
     };
 
     try {
-      await axios.post("https://deeplearn-backend.onrender.com/api/detective", payload);
+     await axios.post('https://deeplearn-backend.onrender.com/api/save/detective', payload);
     } catch (err) {
       console.error("Detective guess submission failed:", err);
     }

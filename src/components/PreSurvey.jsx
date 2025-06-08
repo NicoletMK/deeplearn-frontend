@@ -30,7 +30,7 @@ export default function PreSurvey({ onSubmit }) {
     const payload = { userId, ...answers };
     try {
       console.log("Submitting pre-survey:", payload);
-      await axios.post('https://deeplearn-backend.onrender.com/api/pre-survey', payload);
+      await axios.post('https://deeplearn-backend.onrender.com/api/save/pre-survey', payload);
       if (onSubmit) {
         onSubmit();  // Trigger next step (e.g., routing to Creator or Detective mode)
       }

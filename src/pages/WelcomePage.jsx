@@ -27,13 +27,14 @@ export default function WelcomePage({ onStart, onExit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://deeplearn-backend.onrender.com/api/welcome', {
+      await axios.post('https://deeplearn-backend.onrender.com/api/save/welcome', {
         userId,
         firstName,
         lastName,
         age,
         grade
       });
+
       onStart();
     } catch (err) {
       console.error('❌ Welcome data submission failed:', err);
