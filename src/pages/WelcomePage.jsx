@@ -28,13 +28,19 @@ export default function WelcomePage({ onStart, onExit }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('https://deeplearn-backend.onrender.com/api/save/welcomeData', {
-        userId,
-        firstName,
-        lastName,
-        age,
-        grade
-      });
+      await axios.post(
+        'https://deeplearn-backend.onrender.com/api/save/welcomeData',
+        {
+          userId,
+          firstName,
+          lastName,
+          age,
+          grade
+        },
+        {
+          withCredentials: true  // ✅ Fix for CORS with credentials
+        }
+      );
       onStart();
     } catch (err) {
       console.error('❌ Welcome data submission failed:', err);
@@ -56,8 +62,10 @@ export default function WelcomePage({ onStart, onExit }) {
             <div className="w-6 h-1 bg-blue-800 rounded"></div>
           </button>
           <div
-            className={"absolute right-0 mt-2 w-40 bg-white border border-blue-300 rounded-lg shadow-lg z-10 transform transition-all duration-200 origin-top " +
-              (showMenu ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none")}
+            className={
+              "absolute right-0 mt-2 w-40 bg-white border border-blue-300 rounded-lg shadow-lg z-10 transform transition-all duration-200 origin-top " +
+              (showMenu ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none")
+            }
           >
             <button
               onClick={() => {
