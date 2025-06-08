@@ -9,7 +9,7 @@ export default function WelcomePage({ onStart, onExit }) {
   const [grade, setGrade] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [userId, setUserId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('deeplearnUserId');
@@ -26,10 +26,9 @@ export default function WelcomePage({ onStart, onExit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setLoading(true);
     try {
-      await axios.post('https://deeplearn-backend.onrender.com/api/welcome', {
+      await axios.post('https://deeplearn-backend.onrender.com/api/save/welcomeData', {
         userId,
         firstName,
         lastName,
@@ -41,7 +40,7 @@ export default function WelcomePage({ onStart, onExit }) {
       console.error('❌ Welcome data submission failed:', err);
       alert("There was a problem saving your info. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -84,7 +83,7 @@ export default function WelcomePage({ onStart, onExit }) {
 
       {/* Title */}
       <div className="w-full max-w-4xl mt-8 text-center">
-        <h2 className="text-5xl font-extrabold text-orange-600 mb-4"> Welcome to DeepLearn!</h2>
+        <h2 className="text-5xl font-extrabold text-orange-600 mb-4">Welcome to DeepLearn!</h2>
         <p className="text-xl text-blue-900 font-semibold mb-3">
           You’re about to become a <span className="text-purple-700">deepfake detective</span>! 🕵️‍♀️
         </p>
@@ -137,17 +136,13 @@ export default function WelcomePage({ onStart, onExit }) {
               className="p-3 rounded-md border border-blue-300 focus:outline-none"
               required
             />
-
-            {isLoading ? (
-              <div className="text-blue-600 font-semibold text-center animate-pulse">Saving your info...</div>
-            ) : (
-              <button
-                type="submit"
-                className="bg-green-500 text-white font-bold py-3 rounded-md hover:bg-green-600 transition text-lg"
-              >
-                🚀 Get Started
-              </button>
-            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`bg-green-500 text-white font-bold py-3 rounded-md transition text-lg ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"}`}
+            >
+              {loading ? "Submitting..." : "🚀 Get Started"}
+            </button>
           </form>
         </div>
       </div>
