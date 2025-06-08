@@ -9,7 +9,7 @@ const characters = [
 const phrases = [
   'I love learning about AI!',
   "Let's make a deepfake!",
-  'Technology is awesome!'
+  'Technology is awesome!',
 ];
 
 export default function CreatorMode({ onComplete }) {
@@ -20,36 +20,53 @@ export default function CreatorMode({ onComplete }) {
   const [showModal, setShowModal] = useState(false);
 
   const generateVideo = async () => {
-    if (selectedCharacter && selectedPhraseIndex !== null) {
-      setLoading(true);
-      try {
-        const formData = new FormData();
+    if (!selectedCharacter || selectedPhraseIndex === null) return;
 
-        const imageResponse = await fetch(selectedCharacter.image);
-        const imageBlob = await imageResponse.blob();
-        formData.append('image', imageBlob, `${selectedCharacter.name}.jpg`);
+    setLoading(true);
+    try {
+      const formData = new FormData();
 
-        const voiceFilePath = `/voices/${selectedCharacter.voice}-${selectedPhraseIndex}.mp3`;
-        const audioResponse = await fetch(voiceFilePath);
-        const audioBlob = await audioResponse.blob();
-        formData.append('audio', audioBlob, `${selectedCharacter.voice}-voice.mp3`);
+      // 🖼️ Load image
+      const imageResponse = await fetch(selectedCharacter.image);
+      if (!imageResponse.ok) throw new Error('Failed to load image');
+      const imageBlob = await imageResponse.blob();
+      formData.append('image', imageBlob, `${selectedCharacter.name}.jpg`);
 
-        const response = await fetch('https://deeplearn-backend.onrender.com/generate', {
-          method: 'POST',
-          body: formData,
-        });
+      // 🔊 Load audio
+      const voiceFilePath = `/voices/${selectedCharacter.voice}-${selectedPhraseIndex}.mp3`;
+      const audioResponse = await fetch(voiceFilePath);
+      if (!audioResponse.ok) throw new Error('Failed to load audio');
+      const audioBlob = await audioResponse.blob();
+      formData.append('audio', audioBlob, `${selectedCharacter.voice}-voice.mp3`);
 
-        if (!response.ok) throw new Error('Failed to fetch');
-
-        const data = await response.json();
-        setGeneratedVideo(`${data.videoUrl}?t=${Date.now()}`);
-        setShowModal(true);
-      } catch (error) {
-        console.error('Error generating video:', error);
-        alert('There was a problem generating the video. Please try again.');
-      } finally {
-        setLoading(false);
+      // 🌐 Call /generate with retry logic
+      let response;
+      let error;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          response = await fetch('https://deeplearn-backend.onrender.com/generate', {
+            method: 'POST',
+            body: formData,
+          });
+          if (response.ok) break;
+        } catch (err) {
+          error = err;
+          await new Promise(r => setTimeout(r, 3000));
+        }
       }
+
+      if (!response || !response.ok) throw error || new Error('Server failed to respond');
+
+      const data = await response.json();
+      if (!data.videoUrl) throw new Error('No video URL in response');
+
+      setGeneratedVideo(`${data.videoUrl}?t=${Date.now()}`);
+      setShowModal(true);
+    } catch (error) {
+      console.error('❌ Error generating video:', error);
+      alert('There was a problem generating your video. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
