@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import firebaseConfig from "../utils/firebaseConfig";
-import { db } from '../utils/firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
-
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 export default function EthicsReflection({ onExit }) {
   const [step, setStep] = useState("choose");
@@ -73,7 +63,14 @@ export default function EthicsReflection({ onExit }) {
     };
 
     try {
-      await addDoc(collection(db, "ethicsReflections"), payload);
+      const res = await fetch('https://deeplearn-backend.onrender.com/api/ethics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error(`Failed to save reflection. Status: ${res.status}`);
+
       setCompletedIds([...completedIds, selectedScenario.id]);
       setSelectedScenario(null);
       setReflection("");
@@ -84,7 +81,7 @@ export default function EthicsReflection({ onExit }) {
         setStep("choose");
       }
     } catch (err) {
-      console.error("❌ Firebase ethics reflection submission failed:", err);
+      console.error("❌ Ethics reflection submission failed:", err);
       alert("There was a problem saving your reflection.");
     }
   };
