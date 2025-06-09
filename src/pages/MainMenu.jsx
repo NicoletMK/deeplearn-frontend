@@ -4,7 +4,7 @@ import DetectiveMode from '../components/DetectiveMode';
 import EthicsReflection from '../components/EthicsReflection';
 import { detectivePrePairs, detectivePostPairs } from '../data/detectivePairs';
 
-export default function MainMenu({ onExit }) {
+export default function MainMenu() {
   const [view, setView] = useState('detectivePre');
   const [showMenu, setShowMenu] = useState(false);
 
@@ -36,12 +36,12 @@ export default function MainMenu({ onExit }) {
           >
             <button
               onClick={() => {
-                onExit();
+                setView('detectivePre');
                 setShowMenu(false);
               }}
               className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
             >
-              🔙 Exit to Home
+              🔁 Restart Flow
             </button>
             <button
               onClick={() => {
@@ -95,9 +95,10 @@ export default function MainMenu({ onExit }) {
               onComplete={() => setView('ethics')}
             />
           )}
-          {view === 'ethics' && <EthicsReflection onExit={onExit} />}
+          {view === 'ethics' && <EthicsReflection onExit={() => setView('detectivePre')} />}
         </div>
       </div>
     </div>
   );
 }
+
