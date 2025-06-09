@@ -44,9 +44,8 @@ export default function WelcomePage({ onStart, onExit }) {
       });
 
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
       console.log('✅ Submitted to backend');
-      onStart();
+      onStart(); // Go to next screen
     } catch (error) {
       console.error('❌ Submission failed:', error);
       alert('Something went wrong. Please try again.');
