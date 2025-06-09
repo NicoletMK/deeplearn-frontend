@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WelcomePage from './pages/WelcomePage';
+//import WelcomePage from './pages/WelcomePage';
 import MainMenu from './pages/MainMenu';
 
 export default function App() {
