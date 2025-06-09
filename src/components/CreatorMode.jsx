@@ -1,4 +1,19 @@
+// src/data/creatorVideos.js
+export const creatorVideos = [
+  { id: "booker0", character: "Booker", index: 0, url: "/videos/creator/Booker0.mp4" },
+  { id: "booker1", character: "Booker", index: 1, url: "/videos/creator/Booker1.mp4" },
+  { id: "booker2", character: "Booker", index: 2, url: "/videos/creator/Booker2.mp4" },
+  { id: "raven0", character: "Raven", index: 0, url: "/videos/creator/Raven0.mp4" },
+  { id: "raven1", character: "Raven", index: 1, url: "/videos/creator/Raven1.mp4" },
+  { id: "raven2", character: "Raven", index: 2, url: "/videos/creator/Raven2.mp4" },
+  { id: "nia0", character: "Nia", index: 0, url: "/videos/creator/Nia0.mp4" },
+  { id: "nia1", character: "Nia", index: 1, url: "/videos/creator/Nia1.mp4" },
+  { id: "nia2", character: "Nia", index: 2, url: "/videos/creator/Nia2.mp4" },
+];
+
+// src/pages/CreatorMode.jsx
 import React, { useState } from 'react';
+import { creatorVideos } from '../data/creatorVideos';
 
 const characters = [
   { name: 'Raven', image: '/characters/Raven.png', voice: 'raven' },
@@ -16,57 +31,18 @@ export default function CreatorMode({ onComplete }) {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedPhraseIndex, setSelectedPhraseIndex] = useState(null);
   const [generatedVideo, setGeneratedVideo] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const generateVideo = async () => {
+  const generateVideo = () => {
     if (!selectedCharacter || selectedPhraseIndex === null) return;
-
-    setLoading(true);
-    try {
-      const formData = new FormData();
-
-      // 🖼️ Load image
-      const imageResponse = await fetch(selectedCharacter.image);
-      if (!imageResponse.ok) throw new Error('Failed to load image');
-      const imageBlob = await imageResponse.blob();
-      formData.append('image', imageBlob, `${selectedCharacter.name}.jpg`);
-
-      // 🔊 Load audio
-      const voiceFilePath = `/voices/${selectedCharacter.voice}-${selectedPhraseIndex}.mp3`;
-      const audioResponse = await fetch(voiceFilePath);
-      if (!audioResponse.ok) throw new Error('Failed to load audio');
-      const audioBlob = await audioResponse.blob();
-      formData.append('audio', audioBlob, `${selectedCharacter.voice}-voice.mp3`);
-
-      // 🌐 Call /generate with retry logic
-      let response;
-      let error;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          response = await fetch('https://deeplearn-backend.onrender.com/deeplearn-generate', {
-            method: 'POST',
-            body: formData,
-          });
-          if (response.ok) break;
-        } catch (err) {
-          error = err;
-          await new Promise(r => setTimeout(r, 3000));
-        }
-      }
-
-      if (!response || !response.ok) throw error || new Error('Server failed to respond');
-
-      const data = await response.json();
-      if (!data.videoUrl) throw new Error('No video URL in response');
-
-      setGeneratedVideo(`${data.videoUrl}?t=${Date.now()}`);
+    const match = creatorVideos.find(
+      (v) => v.character === selectedCharacter.name && v.index === selectedPhraseIndex
+    );
+    if (match) {
+      setGeneratedVideo(`${match.url}?t=${Date.now()}`);
       setShowModal(true);
-    } catch (error) {
-      console.error('❌ Error generating video:', error);
-      alert('There was a problem generating your video. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      alert('No matching pre-made video found.');
     }
   };
 
@@ -124,13 +100,12 @@ export default function CreatorMode({ onComplete }) {
 
       <button
         onClick={generateVideo}
-        disabled={!selectedCharacter || selectedPhraseIndex === null || loading}
+        disabled={!selectedCharacter || selectedPhraseIndex === null}
         className="mt-8 bg-orange-500 text-white font-bold py-3 px-10 rounded-md hover:bg-orange-600 transition disabled:opacity-50"
       >
-        {loading ? 'Please be patient — Deepfake AI is working...' : 'Generate Deepfake'}
+        Generate Deepfake
       </button>
 
-      {/** Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-8 max-w-xl w-full text-center">
