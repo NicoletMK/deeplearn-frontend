@@ -28,7 +28,7 @@ export default function WelcomePage({ onStart, onExit }) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/welcome', {
+      const response = await fetch('https://deeplearn-backend.onrender.com/api/welcome', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,16 +39,14 @@ export default function WelcomePage({ onStart, onExit }) {
           lastName,
           age,
           grade,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       console.log('✅ Submitted to backend');
-      onStart(); // Move to next screen
+      onStart();
     } catch (error) {
       console.error('❌ Submission failed:', error);
       alert('Something went wrong. Please try again.');
