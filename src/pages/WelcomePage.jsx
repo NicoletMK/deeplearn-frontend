@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import firebaseConfig from '../utils/firebaseConfig';
+import { db } from '../utils/firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
+
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
