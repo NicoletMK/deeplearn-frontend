@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../utils/firebaseConfig'; // ✅ Use the pre-initialized db
-import { collection, addDoc } from 'firebase/firestore';
 
 export default function WelcomePage({ onStart, onExit }) {
   const [firstName, setFirstName] = useState('');
@@ -28,19 +26,32 @@ export default function WelcomePage({ onStart, onExit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await addDoc(collection(db, 'welcomeUsers'), {
-        userId,
-        firstName,
-        lastName,
-        age,
-        grade,
-        timestamp: new Date().toISOString()
+      const response = await fetch('/api/welcome', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          firstName,
+          lastName,
+          age,
+          grade,
+          timestamp: new Date().toISOString()
+        }),
       });
-      onStart();
-    } catch (err) {
-      console.error('❌ Firebase welcome submission failed:', err);
-      alert("There was a problem saving your info. Please try again.");
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      console.log('✅ Submitted to backend');
+      onStart(); // Move to next screen
+    } catch (error) {
+      console.error('❌ Submission failed:', error);
+      alert('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
