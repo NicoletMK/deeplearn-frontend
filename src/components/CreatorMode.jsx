@@ -13,7 +13,8 @@ export const creatorVideos = [
 
 // src/pages/CreatorMode.jsx
 import React, { useState } from 'react';
-import { creatorVideos } from '../data/creatorVideos';
+const creatorVideos
+
 
 const characters = [
   { name: 'Raven', image: '/characters/Raven.png', voice: 'raven' },
