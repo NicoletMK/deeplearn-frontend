@@ -1,14 +1,14 @@
 // src/data/creatorVideos.js
 export const creatorVideos = [
-  { id: "booker0", character: "Booker", index: 0, url: "/videos/creator/Booker0.mp4" },
-  { id: "booker1", character: "Booker", index: 1, url: "/videos/creator/Booker1.mp4" },
-  { id: "booker2", character: "Booker", index: 2, url: "/videos/creator/Booker2.mp4" },
-  { id: "raven0", character: "Raven", index: 0, url: "/videos/creator/Raven0.mp4" },
-  { id: "raven1", character: "Raven", index: 1, url: "/videos/creator/Raven1.mp4" },
-  { id: "raven2", character: "Raven", index: 2, url: "/videos/creator/Raven2.mp4" },
-  { id: "nia0", character: "Nia", index: 0, url: "/videos/creator/Nia0.mp4" },
-  { id: "nia1", character: "Nia", index: 1, url: "/videos/creator/Nia1.mp4" },
-  { id: "nia2", character: "Nia", index: 2, url: "/videos/creator/Nia2.mp4" },
+  { id: "booker0", character: "Booker", index: 0, url: "/videos/creator/Booker0.mp4", audio: "/voices/booker-0.mp3" },
+  { id: "booker1", character: "Booker", index: 1, url: "/videos/creator/Booker1.mp4", audio: "/voices/booker-1.mp3" },
+  { id: "booker2", character: "Booker", index: 2, url: "/videos/creator/Booker2.mp4", audio: "/voices/booker-2.mp3" },
+  { id: "raven0", character: "Raven", index: 0, url: "/videos/creator/Raven0.mp4", audio: "/voices/raven-0.mp3" },
+  { id: "raven1", character: "Raven", index: 1, url: "/videos/creator/Raven1.mp4", audio: "/voices/raven-1.mp3" },
+  { id: "raven2", character: "Raven", index: 2, url: "/videos/creator/Raven2.mp4", audio: "/voices/raven-2.mp3" },
+  { id: "nia0", character: "Nia", index: 0, url: "/videos/creator/Nia0.mp4", audio: "/voices/nia-0.mp3" },
+  { id: "nia1", character: "Nia", index: 1, url: "/videos/creator/Nia1.mp4", audio: "/voices/nia-1.mp3" },
+  { id: "nia2", character: "Nia", index: 2, url: "/videos/creator/Nia2.mp4", audio: "/voices/nia-2.mp3" },
 ];
 
 // src/pages/CreatorMode.jsx
@@ -31,6 +31,7 @@ export default function CreatorMode({ onComplete }) {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedPhraseIndex, setSelectedPhraseIndex] = useState(null);
   const [generatedVideo, setGeneratedVideo] = useState(null);
+  const [selectedAudio, setSelectedAudio] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const generateVideo = () => {
@@ -40,6 +41,7 @@ export default function CreatorMode({ onComplete }) {
     );
     if (match) {
       setGeneratedVideo(`${match.url}?t=${Date.now()}`);
+      setSelectedAudio(match.audio);
       setShowModal(true);
     } else {
       alert('No matching pre-made video found.');
@@ -50,6 +52,7 @@ export default function CreatorMode({ onComplete }) {
     setSelectedCharacter(null);
     setSelectedPhraseIndex(null);
     setGeneratedVideo(null);
+    setSelectedAudio(null);
     setShowModal(false);
   };
 
@@ -116,6 +119,13 @@ export default function CreatorMode({ onComplete }) {
                 <source src={generatedVideo} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+            )}
+
+            {selectedAudio && (
+              <audio controls className="w-full mt-2">
+                <source src={selectedAudio} type="audio/mp3" />
+                Your browser does not support the audio element.
+              </audio>
             )}
 
             <button
