@@ -11,9 +11,6 @@ export const creatorVideos = [
   { id: "nia2", character: "Nia", index: 2, url: "/videos/creator/Nia2.mp4", audio: "/voices/nia-2.mp3" },
 ];
 
-// src/pages/CreatorMode.jsx
-import React, { useState } from 'react';
-
 // src/pages/DetectiveMode.jsx
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
