@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
-import axios from '../utils/axiosInstance';
 import { v4 as uuidv4 } from "uuid";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import firebaseConfig from "../utils/firebaseConfig";
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default function DetectiveMode({ videoPairs, session = 'pre', onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,12 +38,13 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
       userGuess: type,
       correct,
       session,
+      timestamp: new Date().toISOString()
     };
 
     try {
-     await axios.post('https://deeplearn-backend.onrender.com/api/pre-survey', payload);
+      await addDoc(collection(db, session === 'pre' ? "preSurvey" : "postSurvey"), payload);
     } catch (err) {
-      console.error("Detective guess submission failed:", err);
+      console.error("❌ Firebase detective guess submission failed:", err);
     }
   };
 
@@ -88,20 +95,4 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
           disabled={!!guess}
         >
           Fake
-        </button>
-      </div>
-
-      {feedback && (
-        <div className="text-xl font-semibold text-blue-900 mb-4">{feedback}</div>
-      )}
-      {guess && (
-        <button
-          onClick={nextVideo}
-          className="mt-2 px-5 py-2 bg-orange-500 text-white rounded-full font-bold"
-        >
-          {currentIndex === videoPairs.length - 1 ? "Finish" : "Next Video"}
-        </button>
-      )}
-    </div>
-  );
-}
+        </bu
