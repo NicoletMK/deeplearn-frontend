@@ -13,7 +13,6 @@ export const creatorVideos = [
 
 // src/pages/CreatorMode.jsx
 import React, { useState } from 'react';
-const creatorVideos
 
 
 const characters = [
