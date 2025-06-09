@@ -95,4 +95,20 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
           disabled={!!guess}
         >
           Fake
-        </bu
+        </button>
+      </div>
+
+      {feedback && (
+        <div className="text-xl font-semibold text-blue-900 mb-4">{feedback}</div>
+      )}
+      {guess && (
+        <button
+          onClick={nextVideo}
+          className="mt-2 px-5 py-2 bg-orange-500 text-white rounded-full font-bold"
+        >
+          {currentIndex === videoPairs.length - 1 ? "Finish" : "Next Video"}
+        </button>
+      )}
+    </div>
+  );
+}
