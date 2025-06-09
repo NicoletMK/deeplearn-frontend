@@ -63,7 +63,7 @@ export default function EthicsReflection({ onExit }) {
     };
 
     try {
-      await axios.post('https://deeplearn-backend.onrender.com/api/save/ethicsData', payload);
+      await axios.post('https://deeplearn-backend.onrender.com/api/ethics', payload);
       setCompletedIds([...completedIds, selectedScenario.id]);
       setSelectedScenario(null);
       setReflection("");

@@ -44,7 +44,7 @@ export default function CreatorMode({ onComplete }) {
       let error;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          response = await fetch('https://deeplearn-backend.onrender.com/generate', {
+          response = await fetch('https://deeplearn-backend.onrender.com/deeplearn-generate', {
             method: 'POST',
             body: formData,
           });

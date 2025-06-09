@@ -29,7 +29,7 @@ export default function WelcomePage({ onStart, onExit }) {
     setLoading(true);
     try {
       await axios.post(
-        'https://deeplearn-backend.onrender.com/api/save/welcomeData',
+        'https://deeplearn-backend.onrender.com/api/welcome',
         {
           userId,
           firstName,
