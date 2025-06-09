@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import firebaseConfig from "../utils/firebaseConfig";
-import { db } from '../utils/firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
-
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 export default function DetectiveMode({ videoPairs, session = 'pre', onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -45,9 +35,19 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
     };
 
     try {
-      await addDoc(collection(db, session === 'pre' ? "preSurvey" : "postSurvey"), payload);
+      const res = await fetch('https://deeplearn-backend.onrender.com/api/detective', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to submit guess. Status: ${res.status}`);
+      }
+
+      console.log("✅ Guess submitted to backend");
     } catch (err) {
-      console.error("❌ Firebase detective guess submission failed:", err);
+      console.error("❌ Detective guess submission failed:", err);
     }
   };
 
