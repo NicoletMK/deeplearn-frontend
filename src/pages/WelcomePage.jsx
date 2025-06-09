@@ -38,7 +38,7 @@ export default function WelcomePage({ onStart, onExit }) {
           grade
         },
         {
-          withCredentials: true  // ✅ Fix for CORS with credentials
+          withCredentials: true
         }
       );
       onStart();
@@ -52,7 +52,6 @@ export default function WelcomePage({ onStart, onExit }) {
 
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-6">
-      {/* Top Bar */}
       <div className="relative w-full flex justify-between items-center bg-sky-300 p-4 rounded-t-xl">
         <h1 className="text-3xl font-bold text-blue-900">DeepLearn</h1>
         <div className="relative">
@@ -89,7 +88,6 @@ export default function WelcomePage({ onStart, onExit }) {
         </div>
       </div>
 
-      {/* Title */}
       <div className="w-full max-w-4xl mt-8 text-center">
         <h2 className="text-5xl font-extrabold text-orange-600 mb-4">Welcome to DeepLearn!</h2>
         <p className="text-xl text-blue-900 font-semibold mb-3">
@@ -102,14 +100,11 @@ export default function WelcomePage({ onStart, onExit }) {
         </div>
       </div>
 
-      {/* Form Section */}
       <div className="flex flex-col md:flex-row items-center gap-8 bg-yellow-50 p-6 rounded-lg shadow-md w-full max-w-4xl mt-6">
-        {/* Image */}
         <div className="w-full md:w-1/2 flex justify-center">
           <img src="/Welcome.png" alt="Welcome illustration" className="w-full max-w-md h-auto" />
         </div>
 
-        {/* Form */}
         <div className="w-full md:w-1/2 flex flex-col items-center">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
             <input
