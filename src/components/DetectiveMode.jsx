@@ -35,7 +35,8 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
     };
 
     try {
-      const res = await fetch('https://deeplearn-backend.onrender.com/api/detective', {
+      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';   
+      const res = await fetch(`${backend}/api/detective`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

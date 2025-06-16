@@ -28,7 +28,8 @@ export default function WelcomePage({ onStart, onExit }) {
     setLoading(true);
 
     try {
-      const response = await fetch('https://deeplearn-backend.onrender.com/api/welcome', {
+      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
+      const response = await fetch(`${backend}/api/welcome`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -8,6 +8,8 @@ export default function EthicsReflection({ onExit }) {
   const [completedIds, setCompletedIds] = useState([]);
   const [userId, setUserId] = useState("");
 
+  const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
+
   const scenarios = [
     {
       id: 1,
@@ -40,6 +42,12 @@ export default function EthicsReflection({ onExit }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (step === 'reflect') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step]);
+
   const handleScenarioSelect = (scenario) => {
     if (completedIds.includes(scenario.id)) return;
     setSelectedScenario(scenario);
@@ -63,7 +71,7 @@ export default function EthicsReflection({ onExit }) {
     };
 
     try {
-      const res = await fetch('https://deeplearn-backend.onrender.com/api/ethics', {
+      const res = await fetch(`${backend}/api/ethics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -97,7 +105,11 @@ export default function EthicsReflection({ onExit }) {
             {scenarios.map((scenario) => (
               <div
                 key={scenario.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select scenario: ${scenario.title}`}
                 onClick={() => handleScenarioSelect(scenario)}
+                onKeyDown={(e) => e.key === 'Enter' && handleScenarioSelect(scenario)}
                 className={`cursor-pointer border-4 p-4 rounded-xl shadow-md transition ${
                   completedIds.includes(scenario.id)
                     ? "border-gray-300 bg-gray-100 opacity-60 pointer-events-none"
