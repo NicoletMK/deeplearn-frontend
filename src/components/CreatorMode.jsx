@@ -24,15 +24,21 @@ export default function CreatorMode({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!imageFile || !videoFile) return;
+
     setLoading(true);
     setProgress(10);
     setPreview(null);
 
-    const formData = new FormData();
-    formData.append('imageFileName', imageFile);
-    formData.append('sourceVideo', videoFile);
-
     try {
+      // Convert image from public folder into a File
+      const res = await fetch(`/characters/${imageFile}`);
+      const blob = await res.blob();
+      const file = new File([blob], imageFile, { type: blob.type });
+
+      const formData = new FormData();
+      formData.append('image', file); // must match backend's `request.files['image']`
+      formData.append('sourceVideo', videoFile); // matches backend's `request.form['sourceVideo']`
+
       const response = await axios.post(`${backend}/create-deepfake`, formData, {
         responseType: 'blob',
         onUploadProgress: (e) => {
@@ -40,6 +46,7 @@ export default function CreatorMode({ onComplete }) {
           setProgress(Math.min(percent, 90));
         },
       });
+
       const videoURL = URL.createObjectURL(response.data);
       setProgress(100);
       setPreview(videoURL);
