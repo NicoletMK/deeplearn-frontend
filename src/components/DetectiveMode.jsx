@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function DetectiveMode({ videoPairs, session = 'pre', onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [guess, setGuess] = useState(null);
-  const [feedback, setFeedback] = useState("");
   const [userId, setUserId] = useState("");
-  const current = videoPairs[currentIndex];
+  const [guessIndex, setGuessIndex] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("deeplearnUserId");
@@ -19,100 +20,112 @@ export default function DetectiveMode({ videoPairs, session = 'pre', onComplete 
     }
   }, []);
 
-  const handleGuess = async (type) => {
-    setGuess(type);
-    const correct = current.label === type;
-    setFeedback(correct ? "✅ You got it right!" : "❌ Oops! That's incorrect.");
+  const trimmedPairs = videoPairs.slice(0, 3); // Enforce exactly 3 pairs
+
+  if (!trimmedPairs || trimmedPairs.length === 0) {
+    return <div className="text-center py-10 text-red-600">⚠️ No videos available</div>;
+  }
+
+  const currentPair = trimmedPairs[currentIndex];
+
+  const handleGuess = async (index) => {
+    if (showFeedback) return;
+
+    const selected = currentPair.videos[index];
+    const correct = selected.label === "fake";
+    setGuessIndex(index);
+    setIsCorrect(correct);
+    setShowFeedback(true);
 
     const payload = {
       userId,
-      videoFile: current.videoUrl,
-      actualLabel: current.label,
-      userGuess: type,
-      correct,
       session,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      pairIndex: currentIndex,
+      selectedIndex: index,
+      actualLabel: selected.label,
+      correct,
+      videos: currentPair.videos.map(v => v.url)
     };
 
     try {
-      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';   
-      const res = await fetch(`${backend}/api/detective`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
+      await fetch(`${backend}/api/detective`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-
-      if (!res.ok) {
-        throw new Error(`Failed to submit guess. Status: ${res.status}`);
-      }
-
-      console.log("✅ Guess submitted to backend");
     } catch (err) {
-      console.error("❌ Detective guess submission failed:", err);
+      console.error("❌ Submission failed:", err);
     }
   };
 
-  const nextVideo = () => {
-    if (currentIndex + 1 < videoPairs.length) {
+  const handleNext = () => {
+    if (currentIndex + 1 < trimmedPairs.length) {
       setCurrentIndex(currentIndex + 1);
-      setGuess(null);
-      setFeedback("");
+      setGuessIndex(null);
+      setIsCorrect(null);
+      setShowFeedback(false);
     } else {
       if (onComplete) onComplete();
     }
   };
 
   return (
-    <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-0 pt-4">
-      <img src="/Detection.png" alt="Detective Icon" className="w-56 h-56 mb-4" />
-      <h1 className="text-4xl font-bold text-orange-600 mb-2">
-        Detective Mode {session === "pre" ? "(Before Creation)" : "(After Creation)"}
-      </h1>
-      <p className="text-lg text-blue-900 mb-4 text-center max-w-xl">
-        Watch the video. Can you tell if it’s real or fake?
-      </p>
+    <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-0">
+      <div className="bg-yellow-50 border-4 border-orange-400 rounded-2xl shadow-xl w-full max-w-6xl p-10 text-center mt-0">
+        <h1 className="text-4xl font-bold text-orange-600 mb-6">
+          Detective Mode {session === 'pre' ? '(Before Creation)' : '(After Creation)'}
+        </h1>
+        <p className="text-xl text-gray-800 mb-8">
+          Which one is fake? Click a button to choose.
+        </p>
 
-      <video
-        key={current.videoUrl}
-        controls
-        className="w-full max-w-md rounded-lg shadow-lg mb-4"
-      >
-        <source src={current.videoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8"
+          >
+            {currentPair.videos.map((video, idx) => (
+              <div key={idx} className="flex flex-col items-center">
+                <video controls className="w-full rounded shadow-xl max-w-xl">
+                  <source src={video.url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <button
+                  onClick={() => handleGuess(idx)}
+                  disabled={showFeedback}
+                  className={`mt-4 px-6 py-3 rounded-full font-bold text-white transition-colors duration-300 text-lg
+                    ${showFeedback ?
+                      (idx === guessIndex && isCorrect ? 'bg-green-600' : idx === guessIndex ? 'bg-red-600' : 'bg-gray-400')
+                      : 'bg-blue-500 hover:bg-blue-600'}`}
+                >
+                  Select as Fake
+                </button>
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
-      <div className="flex gap-6 mb-4">
-        <button
-          className={`px-6 py-2 rounded-full font-bold ${
-            guess === "real" ? "bg-blue-700 text-white" : "bg-blue-300"
-          }`}
-          onClick={() => handleGuess("real")}
-          disabled={!!guess}
-        >
-          Real
-        </button>
-        <button
-          className={`px-6 py-2 rounded-full font-bold ${
-            guess === "fake" ? "bg-red-700 text-white" : "bg-red-300"
-          }`}
-          onClick={() => handleGuess("fake")}
-          disabled={!!guess}
-        >
-          Fake
-        </button>
+        {showFeedback && (
+          <div className={`text-2xl font-semibold mb-6 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+            {isCorrect ? '✅ Correct! You spotted the fake.' : '❌ Not quite! That was the real one.'}
+          </div>
+        )}
+
+        {showFeedback && (
+          <button
+            onClick={handleNext}
+            className="mt-4 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full"
+          >
+            {currentIndex === trimmedPairs.length - 1 ? 'Finish' : 'Next'}
+          </button>
+        )}
       </div>
-
-      {feedback && (
-        <div className="text-xl font-semibold text-blue-900 mb-4">{feedback}</div>
-      )}
-      {guess && (
-        <button
-          onClick={nextVideo}
-          className="mt-2 px-5 py-2 bg-orange-500 text-white rounded-full font-bold"
-        >
-          {currentIndex === videoPairs.length - 1 ? "Finish" : "Next Video"}
-        </button>
-      )}
     </div>
   );
 }

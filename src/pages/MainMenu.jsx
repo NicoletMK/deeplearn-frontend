@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CreatorMode from '../components/CreatorMode';
 import DetectiveMode from '../components/DetectiveMode';
 import EthicsReflection from '../components/EthicsReflection';
-import { detectivePrePairs, detectivePostPairs } from '../data/detectivePairs';
+import { detectivePreSets, detectivePostSets } from "../data/detectiveVideoSets";
 
 export default function MainMenu() {
   const [view, setView] = useState('detectivePre');
@@ -80,7 +80,7 @@ export default function MainMenu() {
         <div className="flex-1 p-6 flex flex-col items-center justify-center">
           {view === 'detectivePre' && (
             <DetectiveMode
-              videoPairs={detectivePrePairs}
+              videoPairs={detectivePreSets}
               session="pre"
               onComplete={() => setView('creator')}
             />
@@ -90,7 +90,7 @@ export default function MainMenu() {
           )}
           {view === 'detectivePost' && (
             <DetectiveMode
-              videoPairs={detectivePostPairs}
+              videoPairs={detectivePostSets}
               session="post"
               onComplete={() => setView('ethics')}
             />
