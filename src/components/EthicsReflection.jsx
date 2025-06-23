@@ -7,6 +7,7 @@ export default function EthicsReflection({ onExit }) {
   const [reflection, setReflection] = useState("");
   const [completedIds, setCompletedIds] = useState([]);
   const [userId, setUserId] = useState("");
+  const [grade, setGrade] = useState("");
 
   const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
 
@@ -32,13 +33,21 @@ export default function EthicsReflection({ onExit }) {
   ];
 
   useEffect(() => {
-    const stored = localStorage.getItem("deeplearnUserId");
-    if (stored) {
-      setUserId(stored);
+    const storedId = localStorage.getItem("deeplearnUserId");
+    const storedGrade = localStorage.getItem("deeplearnGrade"); // ✅ try getting grade from localStorage
+
+    if (storedId) {
+      setUserId(storedId);
     } else {
       const newId = uuidv4();
       localStorage.setItem("deeplearnUserId", newId);
       setUserId(newId);
+    }
+
+    if (storedGrade) {
+      setGrade(storedGrade);
+    } else {
+      setGrade(""); // fallback
     }
   }, []);
 
@@ -63,12 +72,15 @@ export default function EthicsReflection({ onExit }) {
 
     const payload = {
       userId,
+      grade: grade || "", // ✅ include fallback grade to avoid Firestore crash
       scenarioId: selectedScenario.id,
       scenarioTitle: selectedScenario.title,
       scenarioText: selectedScenario.description,
       reflection,
       timestamp: new Date().toISOString()
     };
+
+    console.log("📤 Submitting ethics reflection:", payload);
 
     try {
       const res = await fetch(`${backend}/api/ethics`, {
