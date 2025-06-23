@@ -20,6 +20,7 @@ export default function CreatorMode() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true);
 
   const handleSelect = (face) => {
     setLoading(true);
@@ -34,8 +35,6 @@ export default function CreatorMode() {
 
   return (
     <div className="relative min-h-screen bg-yellow-100 p-6 font-sans">
-      <h1 className="text-3xl font-bold text-center mb-6">🎭 Create Your DeepFake Video!</h1>
-
       {showConfetti && <Confetti />}
 
       {loading && (
@@ -55,11 +54,33 @@ export default function CreatorMode() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-3 gap-4 items-start">
+      <h1 className="text-3xl font-bold text-center mb-6">🎭 Create Your DeepFake Video!</h1>
+
+      {showPrompt && (
+        <div className="fixed bottom-6 right-6 bg-white border-4 border-orange-400 shadow-lg p-4 rounded-xl z-50 max-w-xs text-left">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-lg font-bold text-orange-600 mb-1">🎬 How to Use</h2>
+              <p className="text-sm text-gray-800">
+                Tap a human face or a fantasy face to apply it to the video. Try playing the original and your DeepFake video at the same time!
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPrompt(false)}
+              className="text-gray-500 hover:text-red-500 ml-3 font-bold text-lg"
+              aria-label="Close how to use popup"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-6 mt-6">
         {/* Human options */}
-        <div>
-          <h2 className="text-xl font-semibold text-center mb-2">👦 Human Faces</h2>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold text-center mb-4">👦 Human Faces</h2>
+          <div className="flex flex-col gap-3">
             {humanOptions.map((face, idx) => (
               <button
                 key={idx}
@@ -69,7 +90,7 @@ export default function CreatorMode() {
                 <img
                   src={face.image}
                   alt={face.label}
-                  className="w-full rounded-xl shadow-md hover:scale-105"
+                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105"
                 />
                 <div className="text-sm mt-1 font-medium text-center">{face.label}</div>
               </button>
@@ -78,7 +99,7 @@ export default function CreatorMode() {
         </div>
 
         {/* Center videos */}
-        <div className="text-center">
+        <div className="flex-1 text-center">
           <h2 className="text-xl font-semibold mb-2">🎥 Original Base Video</h2>
           <video src="/videos/creator/Vid.mp4" controls className="mx-auto rounded-lg shadow-xl w-full max-w-md mb-6" />
           {selected && (
@@ -90,9 +111,9 @@ export default function CreatorMode() {
         </div>
 
         {/* Nonhuman options */}
-        <div>
-          <h2 className="text-xl font-semibold text-center mb-2">🧸 Fantacy Faces</h2>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold text-center mb-4">🧸 Fantasy Faces</h2>
+          <div className="flex flex-col gap-3">
             {nonhumanOptions.map((face, idx) => (
               <button
                 key={idx}
@@ -102,7 +123,7 @@ export default function CreatorMode() {
                 <img
                   src={face.image}
                   alt={face.label}
-                  className="w-full rounded-xl shadow-md hover:scale-105"
+                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105"
                 />
                 <div className="text-sm mt-1 font-medium text-center">{face.label}</div>
               </button>

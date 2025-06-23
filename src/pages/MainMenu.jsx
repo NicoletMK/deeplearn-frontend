@@ -4,7 +4,7 @@ import DetectiveMode from '../components/DetectiveMode';
 import EthicsReflection from '../components/EthicsReflection';
 import { detectivePreSets, detectivePostSets } from "../data/detectiveVideoSets";
 
-export default function MainMenu() {
+export default function MainMenu({ onExit }) {
   const [view, setView] = useState('detectivePre');
   const [showMenu, setShowMenu] = useState(false);
 
@@ -95,10 +95,11 @@ export default function MainMenu() {
               onComplete={() => setView('ethics')}
             />
           )}
-          {view === 'ethics' && <EthicsReflection onExit={() => setView('detectivePre')} />}
+          {view === 'ethics' && (
+            <EthicsReflection onExit={onExit} />
+          )}
         </div>
       </div>
     </div>
   );
 }
-

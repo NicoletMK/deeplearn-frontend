@@ -34,7 +34,7 @@ export default function EthicsReflection({ onExit }) {
 
   useEffect(() => {
     const storedId = localStorage.getItem("deeplearnUserId");
-    const storedGrade = localStorage.getItem("deeplearnGrade"); // optional storage
+    const storedGrade = localStorage.getItem("deeplearnGrade");
 
     if (storedId) {
       setUserId(storedId);
@@ -47,7 +47,7 @@ export default function EthicsReflection({ onExit }) {
     if (storedGrade) {
       setGrade(storedGrade);
     } else {
-      setGrade(""); // fallback
+      setGrade("");
     }
   }, []);
 
@@ -162,22 +162,23 @@ export default function EthicsReflection({ onExit }) {
       )}
 
       {step === "done" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-start bg-green-100 px-6 pt-20 z-50">
-          <div className="text-7xl mb-6">🎉</div>
-          <h2 className="text-5xl font-bold text-green-800 mb-4">Great job!</h2>
-          <p className="text-2xl text-gray-800 mb-8 max-w-3xl text-center leading-relaxed">
-            You've thoughtfully reflected on all 3 real-life AI scenarios.
-            <br />
-            You're becoming a mindful AI explorer!
-          </p>
-          <button
-            onClick={() => {
-              if (onExit) onExit();
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-full text-xl transition"
-          >
-            ✅ Finish
-          </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-green-100 border-4 border-green-300 rounded-2xl p-8 max-w-lg w-full text-center shadow-xl">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-3xl font-bold text-green-800 mb-3">Great job!</h2>
+            <p className="text-lg text-gray-800 mb-6">
+              You've thoughtfully reflected on all 3 real-life AI scenarios.<br />
+              You're becoming a mindful AI explorer!
+            </p>
+            <button
+              onClick={() => {
+                if (onExit) onExit();
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full text-lg transition"
+            >
+              ✅ Finish
+            </button>
+          </div>
         </div>
       )}
     </div>
