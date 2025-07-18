@@ -2,19 +2,46 @@ import React, { useState } from 'react';
 import CreatorMode from '../components/CreatorMode';
 import DetectiveMode from '../components/DetectiveMode';
 import EthicsReflection from '../components/EthicsReflection';
+import HeyGenDemo from '../components/CreatorHeyGen'; // New component for HeyGen videos
 import { detectivePreSets, detectivePostSets } from "../data/detectiveVideoSets";
 
 export default function MainMenu({ onExit }) {
-  const [view, setView] = useState('detectivePre');
+  const [view, setView] = useState('detectiveTraining');
   const [showMenu, setShowMenu] = useState(false);
 
   const toggleMenu = () => setShowMenu(!showMenu);
 
   const views = [
-    { key: 'detectivePre', label: 'Detective Pre', icon: '/DetectiveIcon.png' },
-    { key: 'creator', label: 'Creator', icon: '/CreativeIcon.png' },
-    { key: 'detectivePost', label: 'Detective Post', icon: '/DetectiveIcon.png' },
-    { key: 'ethics', label: 'Ethics', icon: '/EthicalIcon.png' }
+    { 
+      key: 'detectiveTraining', 
+      label: 'Detective Training', 
+      icon: '/DetectiveIcon.png',
+      subtitle: 'Learn detection basics'
+    },
+    { 
+      key: 'deepfakeStudio', 
+      label: 'Deepfake Studio', 
+      icon: '/CreativeIcon.png',
+      subtitle: 'Try premade deepfakes'
+    },
+    { 
+      key: 'aiVideoLab', 
+      label: 'AI Video Lab', 
+      icon: '/HeyGenIcon.png', // New icon
+      subtitle: 'See HeyGen\'s avatar tech'
+    },
+    { 
+      key: 'deepfakeForensics', 
+      label: 'Deepfake Forensics', 
+      icon: '/DetectiveIcon.png',
+      subtitle: 'Test your skills'
+    },
+    { 
+      key: 'ethicsHub', 
+      label: 'Ethics Hub', 
+      icon: '/EthicalIcon.png',
+      subtitle: 'Reflect on implications'
+    }
   ];
 
   return (
@@ -36,7 +63,7 @@ export default function MainMenu({ onExit }) {
           >
             <button
               onClick={() => {
-                setView('detectivePre');
+                setView('detectiveTraining');
                 setShowMenu(false);
               }}
               className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
@@ -59,43 +86,47 @@ export default function MainMenu({ onExit }) {
       {/* Sidebar + Main */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <div className="w-48 bg-sky-300 p-4 flex flex-col items-center gap-6 text-white font-semibold">
-          {views.map(({ key, label, icon }) => (
+        <div className="w-48 bg-sky-300 p-4 flex flex-col items-center gap-4 text-white font-semibold">
+          {views.map(({ key, label, icon, subtitle }) => (
             <button
               key={key}
               onClick={() => setView(key)}
-              className={`flex flex-col items-center gap-2 ${
-                view === key ? 'text-yellow-200' : 'hover:text-yellow-200'
+              className={`flex flex-col items-center gap-1 w-full p-2 rounded-lg ${
+                view === key ? 'bg-blue-500 text-yellow-200' : 'hover:bg-blue-400'
               }`}
             >
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
-                <img src={icon} alt={label} className="w-12 h-12" />
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                <img src={icon} alt={label} className="w-10 h-10" />
               </div>
-              <span className="text-sm mt-1">{label}</span>
+              <span className="text-sm font-bold">{label}</span>
+              <span className="text-xs text-center opacity-80">{subtitle}</span>
             </button>
           ))}
         </div>
 
         {/* Main View */}
         <div className="flex-1 p-6 flex flex-col items-center justify-center">
-          {view === 'detectivePre' && (
+          {view === 'detectiveTraining' && (
             <DetectiveMode
               videoPairs={detectivePreSets}
               session="pre"
-              onComplete={() => setView('creator')}
+              onComplete={() => setView('deepfakeStudio')}
             />
           )}
-          {view === 'creator' && (
-            <CreatorMode onComplete={() => setView('detectivePost')} />
+          {view === 'deepfakeStudio' && (
+            <CreatorMode onComplete={() => setView('aiVideoLab')} />
           )}
-          {view === 'detectivePost' && (
+          {view === 'aiVideoLab' && (
+            <HeyGenDemo onComplete={() => setView('deepfakeForensics')} />
+          )}
+          {view === 'deepfakeForensics' && (
             <DetectiveMode
               videoPairs={detectivePostSets}
               session="post"
-              onComplete={() => setView('ethics')}
+              onComplete={() => setView('ethicsHub')}
             />
           )}
-          {view === 'ethics' && (
+          {view === 'ethicsHub' && (
             <EthicsReflection onExit={onExit} />
           )}
         </div>
