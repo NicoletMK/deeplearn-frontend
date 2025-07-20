@@ -15,19 +15,19 @@ const phrases = [
 // Mapping of character and phrase index to pre-made videos
 const videoMap = {
   raven: {
-    0: '/videos/vidAudio/Raven0.mp4',
-    1: '/videos/vidAudio/Raven1.mp4',
-    2: '/videos/vidAudio/Raven2.mp4'
+    0: '/videos/creator/Raven0.mp4',
+    1: '/videos/creator/Raven1.mp4',
+    2: '/videos/creator/Raven2.mp4'
   },
   booker: {
-    0: '/videos/vidAudio/Booker0.mp4',
-    1: '/videos/vidAudio/Booker1.mp4',
-    2: '/videos/vidAudio/Booker2.mp4'
+    0: '/videos/creator/Booker0.mp4',
+    1: '/videos/creator/Booker1.mp4',
+    2: '/videos/creator/Booker2.mp4'
   },
   nia: {
-    0: '/videos/vidAudio/Nia0.mp4',
-    1: '/videos/vidAudio/Nia1.mp4',
-    2: '/videos/vidAudio/Nia2.mp4'
+    0: '/videos/creator/Nia0.mp4',
+    1: '/videos/creator/Nia1.mp4',
+    2: '/videos/creator/Nia2.mp4'
   }
 };
 
