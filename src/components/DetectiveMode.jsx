@@ -223,19 +223,30 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           {sessionTitle}
         </h1>
 
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white/70 border border-orange-200 rounded-xl p-4 md:p-5 text-gray-900">
-            <p className="text-lg font-semibold">Watch both clips carefully.</p>
-            <p className="mt-3 text-sm md:text-base">
-              Use the checkboxes to mark which clip(s) you believe are AI-generated.<br />
-              If you think both are real, leave both unchecked.
-            </p>
-            <p className="mt-2 text-sm md:text-base">
-              Then, share what clues you noticed by picking at least one option below.
-              Last, write a brief reason.
-            </p>
-          </div>
-        </div>
+<div className="max-w-3xl mx-auto">
+  <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
+    <p className="text-xl font-bold text-orange-700 mb-3">
+      Watch both clips carefully.
+    </p>
+
+    <p className="text-base md:text-lg leading-relaxed mb-3">
+      Use the checkboxes to mark which clip(s) you believe are AI-generated.
+    </p>
+
+    <p className="text-base md:text-lg leading-relaxed mb-3">
+      If you think both are real, leave both unchecked.
+    </p>
+
+    <p className="text-base md:text-lg leading-relaxed mb-3">
+      Then, share what clues you noticed by picking <span className="font-semibold text-orange-700">at least one</span> option below.
+    </p>
+    
+    <p className="text-base md:text-lg leading-relaxed mb-3">
+      Finally, write a brief reason.
+    </p>
+  </div>
+</div>
+
 
         <div className="mt-4 mb-4">
           <div className="text-sm md:text-base text-gray-700">
