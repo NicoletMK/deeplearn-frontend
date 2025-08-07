@@ -2,39 +2,27 @@ import React, { useState, useEffect, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { motion, AnimatePresence } from "framer-motion";
 
+const MIN_REASON_LEN = 12; // Adjust as needed
 
-const GROUP_TITLES = [
-  "Famous Faces Speaking Out",   // 1 Celebrity Speeches
-  "Tech Visionary Speaks",       // 2 Elon Musk's Talks
-  "Science in Action",           // 3 Scientists' Talks
-  "Tales of Legends",            // 4 Giants Stories
-  "Laugh Out Loud",              // 5 Funny Videos
-  "Meet the Guys",               // 6 Men's Intro
-  "Acts of Kindness",            // 7 Charity
-  "Breaking Stories",            // 8 News
-  "Action & Moves",              // 9 Motions
-  "Style on Screen"              // 10 Fashion Commercials
-];
-
-const GROUP_SUBTITLES = [
-  "Public speeches by famous people",
-  "Talks from a well-known tech leader",
-  "Scientists sharing discoveries",
-  "Stories about larger-than-life figures",
-  "Clips made to make you giggle",
-  "Short introductions from different men",
-  "Doing good and helping others",
-  "Current events and reports",
-  "High-energy action and dramatic moves",
-  "Trendy ads and fashion moments"
-];
+const GROUP_SUBTITLES = {
+  "Famous Faces Speaking Out": "Public speeches by famous people",
+  "Tech Visionary Speaks": "Talks from a well-known tech leader",
+  "Science in Action": "Scientists sharing discoveries",
+  "Tales of Legends": "Stories about larger-than-life figures",
+  "Laugh Out Loud": "Clips made to make you giggle",
+  "Meet the Guys": "Short introductions from different men",
+  "Acts of Kindness": "Doing good and helping others",
+  "Breaking Stories": "Current events and reports",
+  "Action & Moves": "High-energy action and dramatic moves",
+  "Style on Screen": "Trendy ads and fashion moments"
+};
 
 const FEATURE_OPTIONS = [
   "Lip-sync mismatch",
   "Mouth not matching voice",
   "Blinking looks odd / too regular",
   "Face edges / boundary artifacts",
-  "Skin texture looks too smooth / waxy",
+  "Skin texture too smooth / waxy",
   "Lighting or shadows inconsistent",
   "Reflections don’t match (glasses/eyes)",
   "Hands / fingers look strange",
@@ -46,61 +34,13 @@ const FEATURE_OPTIONS = [
   "Context seems unlikely / too perfect"
 ];
 
-
-const DEFAULT_VIDEO_PAIRS = [
-  { videos: [
-      { url: "/videos/detection/Real1.mp3", label: "real" },
-      { url: "/videos/detection/Fake1.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake2.mp3", label: "fake" },
-      { url: "/videos/detection/Fake22.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake3.mp3", label: "fake" },
-      { url: "/videos/detection/Real3.mp3", label: "real" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake4.mp3", label: "fake" },
-      { url: "/videos/detection/Fake44.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake5.mp3", label: "fake" },
-      { url: "/videos/detection/Fake55.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake6.mp3", label: "fake" },
-      { url: "/videos/detection/Real6.mp3", label: "real" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Real7.mp3", label: "real" },
-      { url: "/videos/detection/Fake7.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Real8.mp3", label: "real" },
-      { url: "/videos/detection/Fake8.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake9.mp3", label: "fake" },
-      { url: "/videos/detection/Fake99.mp3", label: "fake" }
-    ]},
-  { videos: [
-      { url: "/videos/detection/Fake10.mp3", label: "fake" },
-      { url: "/videos/detection/Fake11.mp3", label: "fake" }
-    ]}
-];
-
-/**
- * Simple media player that chooses <video> for typical video extensions; else <audio>.
- */
+// Media player that picks <video> for video extensions; otherwise <audio>
 function MediaPlayer({ src }) {
   const ext = (src.split(".").pop() || "").toLowerCase();
   const isVideo = ["mp4", "webm", "mov"].includes(ext);
 
   if (isVideo) {
-    const type =
-      ext === "webm" ? "video/webm" :
-      ext === "mov" ? "video/quicktime" : "video/mp4";
+    const type = ext === "webm" ? "video/webm" : ext === "mov" ? "video/quicktime" : "video/mp4";
     return (
       <video controls className="w-full rounded shadow-xl max-w-xl">
         <source src={src} type={type} />
@@ -108,8 +48,6 @@ function MediaPlayer({ src }) {
       </video>
     );
   }
-
-  // audio
   const type = ext === "mp3" ? "audio/mpeg" : "audio/mp4";
   return (
     <audio controls className="w-full rounded shadow-xl max-w-xl">
@@ -119,9 +57,6 @@ function MediaPlayer({ src }) {
   );
 }
 
-/**
- * Little chip-style checkbox
- */
 function Chip({ checked, label, onToggle }) {
   return (
     <button
@@ -135,22 +70,25 @@ function Chip({ checked, label, onToggle }) {
   );
 }
 
-export default function DetectiveMode({
-  videoPairs = DEFAULT_VIDEO_PAIRS,
-  session = "pre",
-  onComplete
-}) {
+/**
+ * Props:
+ * - videoPairs: array of { title?: string, videos: [{url,label}] }
+ * - session: 'pre' | 'post'
+ * - onComplete: optional callback
+ */
+export default function DetectiveMode({ videoPairs, session = "pre", onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userId, setUserId] = useState("");
-  const [guessIndex, setGuessIndex] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [selectedIndices, setSelectedIndices] = useState([]); // allow selecting one or both clips
+  const [submitted, setSubmitted] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);     // only used in post
   const [isCorrect, setIsCorrect] = useState(null);
 
-  // Answer Board state
-  const [featureSet, setFeatureSet] = useState([]);      // array of FEATURE_OPTIONS that are selected
-  const [otherFeature, setOtherFeature] = useState("");  // free-form "other" feature
-  const [reasoning, setReasoning] = useState("");        // short explanation
-  const [confidence, setConfidence] = useState(3);       // 1..5 scale
+  // Answer board state
+  const [featureSet, setFeatureSet] = useState([]);
+  const [otherFeature, setOtherFeature] = useState("");
+  const [reasoning, setReasoning] = useState("");
+  const [confidence, setConfidence] = useState(3);
 
   // Persist a user id
   useEffect(() => {
@@ -164,51 +102,68 @@ export default function DetectiveMode({
     }
   }, []);
 
-  // Reset answer board on group change
+  // Reset state on group change
   useEffect(() => {
+    setSelectedIndices([]);
+    setSubmitted(false);
+    setShowFeedback(false);
+    setIsCorrect(null);
     setFeatureSet([]);
     setOtherFeature("");
     setReasoning("");
     setConfidence(3);
   }, [currentIndex]);
 
-  // Guard
   const total = videoPairs?.length || 0;
   if (!videoPairs || total === 0) {
-    return (
-      <div className="text-center py-10 text-red-600">
-        ⚠️ No videos available
-      </div>
-    );
-  }
+    return <div className="text-center py-10 text-red-600">⚠️ No videos available</div>;
+    }
 
   const currentPair = videoPairs[currentIndex];
-  const groupTitle = GROUP_TITLES[currentIndex] || `Group ${currentIndex + 1}`;
-  const groupSubtitle = GROUP_SUBTITLES[currentIndex] || "";
+  const groupTitle = currentPair.title || `Group ${currentIndex + 1}`;
+  const groupSubtitle = GROUP_SUBTITLES[groupTitle] || "";
 
-  // Randomize left/right per group view
+  // Randomize left/right per view, but keep stable while viewing a group
   const randomizedIndices = useMemo(() => {
     const order = [0, 1];
     if (Math.random() < 0.5) order.reverse();
     return order;
   }, [currentIndex]);
 
-  const toggleFeature = (label) => {
-    setFeatureSet((prev) =>
-      prev.includes(label) ? prev.filter((f) => f !== label) : [...prev, label]
+  const toggleClipSelection = (idxInView) => {
+    if (submitted) return;
+    setSelectedIndices((prev) =>
+      prev.includes(idxInView) ? prev.filter((i) => i !== idxInView) : [...prev, idxInView]
     );
   };
 
-  const handleGuess = async (indexInView) => {
-    if (showFeedback) return;
+  // Validation
+  const hasClipSelection = selectedIndices.length > 0;
+  const hasFeatureEvidence = featureSet.length > 0 || (otherFeature?.trim()?.length ?? 0) > 0;
+  const hasReason = (reasoning?.trim()?.length ?? 0) >= MIN_REASON_LEN;
+  const canSubmit = hasClipSelection && (hasFeatureEvidence || hasReason);
 
-    const actualIndex = randomizedIndices[indexInView];
-    const selected = currentPair.videos[actualIndex];
-    const correct = selected.label === "fake";
+  const handleSubmit = async () => {
+    if (submitted || !canSubmit) return;
 
-    setGuessIndex(indexInView);
-    setIsCorrect(correct);
-    setShowFeedback(true);
+    // Map selected (view) indices back to actual indices in the pair
+    const selectedActual = selectedIndices.map((i) => randomizedIndices[i]).sort();
+    const fakeSet = currentPair.videos
+      .map((v, i) => (v.label === "fake" ? i : null))
+      .filter((i) => i !== null)
+      .sort();
+
+    // Correct only if the sets match exactly (supports 0, 1, or 2 fakes)
+    const allCorrect =
+      selectedActual.length === fakeSet.length &&
+      selectedActual.every((v, i) => v === fakeSet[i]);
+
+    setSubmitted(true);
+
+    if (session === "post") {
+      setIsCorrect(allCorrect);
+      setShowFeedback(true);
+    }
 
     const payload = {
       userId,
@@ -216,16 +171,14 @@ export default function DetectiveMode({
       timestamp: new Date().toISOString(),
       pairIndex: currentIndex,
       groupTitle,
-      selectedIndex: actualIndex,
-      selectedUrl: selected.url,
-      actualLabel: selected.label,
-      correct,
+      selectedViewIndices: selectedIndices,        // [0..1] in view space
+      selectedActualIndices: selectedActual,       // [0..1] actual indices
+      groundTruthFakeIndices: fakeSet,             // [0..1]
+      correct: allCorrect,
       videos: currentPair.videos.map((v) => v.url),
-
-      // Answer Board data
       prompts: {
-        question1: "Which one do you think is AI-generated?",
-        answer1: indexInView === 0 ? "Left / Clip A" : "Right / Clip B",
+        question1: "Which clip(s) do you think are AI-generated?",
+        answer1: selectedIndices.map((i) => (i === 0 ? "Clip A" : "Clip B")),
         question2: "What features made you think that? (Select all that apply)",
         answer2: featureSet,
         question3: "Anything else you noticed?",
@@ -238,8 +191,7 @@ export default function DetectiveMode({
     };
 
     try {
-      const backend =
-        import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
+      const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
       await fetch(`${backend}/api/detective`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -253,23 +205,24 @@ export default function DetectiveMode({
   const handleNext = () => {
     if (currentIndex + 1 < total) {
       setCurrentIndex(currentIndex + 1);
-      setGuessIndex(null);
-      setIsCorrect(null);
-      setShowFeedback(false);
-    } else {
-      if (onComplete) onComplete();
+    } else if (onComplete) {
+      onComplete();
     }
   };
+
+  // Reasoning counters
+  const reasonLen = reasoning.trim().length;
+  const reasonOk = reasonLen >= MIN_REASON_LEN;
 
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
       <div className="bg-yellow-50 border-4 border-orange-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
         <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600 mb-2">
-          Detective Mode {session === "pre" ? "(Before Creation)" : "(After Creation)"}
+          Detective Mode {session === "pre" ? "(Warm-Up Detective)" : "(Master Detective)"}
         </h1>
 
         <p className="text-base md:text-lg text-gray-800">
-          Watch (or listen to) both clips. Which one is fake?
+          Watch (or listen to) both clips. Select one or both clips you think are AI-generated, then submit.
         </p>
 
         <div className="mt-1 mb-4">
@@ -281,9 +234,7 @@ export default function DetectiveMode({
             {groupTitle}
           </div>
           {groupSubtitle && (
-            <div className="text-sm md:text-base text-gray-600">
-              {groupSubtitle}
-            </div>
+            <div className="text-sm md:text-base text-gray-600">{groupSubtitle}</div>
           )}
         </div>
 
@@ -306,24 +257,16 @@ export default function DetectiveMode({
           >
             {randomizedIndices.map((pairIdxInPair, idxInView) => {
               const media = currentPair.videos[pairIdxInPair];
+              const selected = selectedIndices.includes(idxInView);
               return (
                 <div key={idxInView} className="flex flex-col items-center">
                   <MediaPlayer src={media.url} />
                   <button
-                    onClick={() => handleGuess(idxInView)}
-                    disabled={showFeedback}
+                    onClick={() => toggleClipSelection(idxInView)}
                     className={`mt-4 px-6 py-3 rounded-full font-bold text-white transition-colors duration-300 text-lg
-                      ${
-                        showFeedback
-                          ? idxInView === guessIndex && isCorrect
-                            ? "bg-green-600"
-                            : idxInView === guessIndex
-                            ? "bg-red-600"
-                            : "bg-gray-400"
-                          : "bg-blue-500 hover:bg-blue-600"
-                      }`}
+                      ${selected ? "bg-purple-600" : "bg-blue-500 hover:bg-blue-600"}`}
                   >
-                    Select as Fake
+                    {selected ? "Selected as AI-generated" : "Mark as AI-generated"}
                   </button>
                   <div className="mt-2 text-sm text-gray-500">
                     {idxInView === 0 ? "Clip A" : "Clip B"}
@@ -334,31 +277,34 @@ export default function DetectiveMode({
           </motion.div>
         </AnimatePresence>
 
-        {/* ------------------ Question Prompts & Answer Board ------------------ */}
+        {/* Question Prompts & Answer Board */}
         <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto">
           <h2 className="text-xl md:text-2xl font-bold text-orange-700 mb-3">
             Question Prompts
           </h2>
 
           <div className="space-y-4">
-            {/* Q1 */}
             <div>
               <div className="font-semibold text-gray-900">
-                1) Which one do you think is AI-generated?
+                1) Which clip(s) do you think are AI-generated?
               </div>
               <div className="text-sm text-gray-600 mb-2">
-                You’ll still need to press a “Select as Fake” button above to lock in your answer.
+                Toggle “Mark as AI-generated” above for Clip A and/or Clip B.
               </div>
               <div className="flex gap-3">
-                <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700">Clip A = Left</span>
-                <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700">Clip B = Right</span>
+                <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                  Clip A = Left
+                </span>
+                <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                  Clip B = Right
+                </span>
               </div>
             </div>
 
-            {/* Q2 */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
-                2) What features made you think that? <span className="text-gray-500">(Select all that apply)</span>
+                2) What features made you think that?{" "}
+                <span className="text-gray-500">(Select all that apply)</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {FEATURE_OPTIONS.map((opt) => (
@@ -366,7 +312,11 @@ export default function DetectiveMode({
                     key={opt}
                     label={opt}
                     checked={featureSet.includes(opt)}
-                    onToggle={() => toggleFeature(opt)}
+                    onToggle={() =>
+                      setFeatureSet((prev) =>
+                        prev.includes(opt) ? prev.filter((f) => f !== opt) : [...prev, opt]
+                      )
+                    }
                   />
                 ))}
               </div>
@@ -379,7 +329,6 @@ export default function DetectiveMode({
               />
             </div>
 
-            {/* Q3 */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
                 3) Explain your reasoning in 1–3 sentences.
@@ -388,15 +337,20 @@ export default function DetectiveMode({
                 value={reasoning}
                 onChange={(e) => setReasoning(e.target.value)}
                 rows={3}
-                placeholder="What clues did you notice? How did they help you decide?"
+                placeholder={`What clues did you notice? (${MIN_REASON_LEN}+ characters or pick at least one feature above)`}
                 className="w-full border rounded-lg p-3"
               />
+              <div className="mt-1 text-xs">
+                <span className={`${reasonOk ? "text-green-700" : "text-red-600"}`}>
+                  {reasonLen}/{MIN_REASON_LEN} {reasonOk ? "✓" : "characters needed"}
+                </span>
+              </div>
             </div>
 
-            {/* Q4 */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
-                4) How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
+                4) How confident are you?{" "}
+                <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
               </div>
               <div className="flex items-center gap-3">
                 <input
@@ -413,25 +367,76 @@ export default function DetectiveMode({
           </div>
         </div>
 
-        {/* Feedback & Next */}
-        {showFeedback && (
-          <div
-            className={`text-2xl font-semibold mt-6 ${isCorrect ? "text-green-600" : "text-red-600"}`}
-          >
-            {isCorrect
-              ? "✅ Correct! You spotted the fake."
-              : "❌ Not quite! That was the real one."}
-          </div>
-        )}
+        {/* Submit / Feedback / Next */}
+        <div className="mt-4 flex flex-col items-center gap-3">
+          {!submitted && (
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className={`px-8 py-3 text-white text-lg font-bold rounded-full
+                  ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+              >
+                Submit Answer
+              </button>
 
-        {showFeedback && (
-          <button
-            onClick={handleNext}
-            className="mt-3 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full"
-          >
-            {currentIndex === total - 1 ? "Finish" : "Next"}
-          </button>
-        )}
+              {!canSubmit && (
+                <div className="text-sm text-gray-700 text-center max-w-xl">
+                  To submit, please:
+                  <ul className="list-disc list-inside text-left">
+                    {!hasClipSelection && <li>Select at least one clip (Clip A and/or Clip B).</li>}
+                    {hasClipSelection && !hasFeatureEvidence && !hasReason && (
+                      <li>
+                        Choose at least one feature <em>or</em> write a short reason ({MIN_REASON_LEN}+ characters).
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {submitted && session === "pre" && (
+            <>
+              {/* No correctness feedback in pre */}
+              <div className="text-gray-700 text-lg">Answer saved.</div>
+              <button
+                onClick={handleNext}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full"
+              >
+                {currentIndex === total - 1 ? "Finish" : "Next"}
+              </button>
+            </>
+          )}
+
+          {submitted && session === "post" && showFeedback && (
+            <>
+              <div
+                className={`text-2xl font-semibold ${
+                  isCorrect ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {isCorrect ? "✅ Correct!" : "❌ Not quite."}
+              </div>
+
+              {/* Show ground-truth for transparency in post */}
+              <div className="text-sm text-gray-700">
+                Ground truth fakes:{" "}
+                {currentPair.videos
+                  .map((v, i) => (v.label === "fake" ? (i === 0 ? "Clip A" : "Clip B") : null))
+                  .filter(Boolean)
+                  .join(" & ") || "None"}
+              </div>
+
+              <button
+                onClick={handleNext}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full mt-2"
+              >
+                {currentIndex === total - 1 ? "Finish" : "Next"}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
