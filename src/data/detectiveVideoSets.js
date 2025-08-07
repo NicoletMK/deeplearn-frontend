@@ -3,8 +3,8 @@ export const detectionSets = [
   {
     title: "Famous Faces Speaking Out",
     videos: [
-      { url: "/videos/detection/Real1.mp3", label: "real" },
-      { url: "/videos/detection/Fake1.mp3", label: "fake" }
+      { url: "/videos/detection/Real1.mp4", label: "real" },
+      { url: "/videos/detection/Fake1.mp4", label: "fake" }
     ]
   },
 
@@ -12,8 +12,8 @@ export const detectionSets = [
   {
     title: "Tech Visionary Speaks",
     videos: [
-      { url: "/videos/detection/Fake2.mp3", label: "fake" },
-      { url: "/videos/detection/Fake22.mp3", label: "fake" }
+      { url: "/videos/detection/Fake2.mp4", label: "fake" },
+      { url: "/videos/detection/Fake22.mp4", label: "fake" }
     ]
   },
 
@@ -21,8 +21,8 @@ export const detectionSets = [
   {
     title: "Science in Action",
     videos: [
-      { url: "/videos/detection/Fake3.mp3", label: "fake" },
-      { url: "/videos/detection/Real3.mp3", label: "real" }
+      { url: "/videos/detection/Fake3.mp4", label: "fake" },
+      { url: "/videos/detection/Real3.mp4", label: "real" }
     ]
   },
 
@@ -30,8 +30,8 @@ export const detectionSets = [
   {
     title: "Tales of Legends",
     videos: [
-      { url: "/videos/detection/Fake4.mp3", label: "fake" },
-      { url: "/videos/detection/Fake44.mp3", label: "fake" }
+      { url: "/videos/detection/Fake4.mp4", label: "fake" },
+      { url: "/videos/detection/Fake44.mp4", label: "fake" }
     ]
   },
 
@@ -39,8 +39,8 @@ export const detectionSets = [
   {
     title: "Laugh Out Loud",
     videos: [
-      { url: "/videos/detection/Fake5.mp3", label: "fake" },
-      { url: "/videos/detection/Fake55.mp3", label: "fake" }
+      { url: "/videos/detection/Fake5.mp4", label: "fake" },
+      { url: "/videos/detection/Fake55.mp4", label: "fake" }
     ]
   },
 
@@ -48,8 +48,8 @@ export const detectionSets = [
   {
     title: "Meet the Guys",
     videos: [
-      { url: "/videos/detection/Fake6.mp3", label: "fake" },
-      { url: "/videos/detection/Real6.mp3", label: "real" }
+      { url: "/videos/detection/Fake6.mp4", label: "fake" },
+      { url: "/videos/detection/Real6.mp4", label: "real" }
     ]
   },
 
@@ -57,8 +57,8 @@ export const detectionSets = [
   {
     title: "Acts of Kindness",
     videos: [
-      { url: "/videos/detection/Real7.mp3", label: "real" },
-      { url: "/videos/detection/Fake7.mp3", label: "fake" }
+      { url: "/videos/detection/Real7.mp4", label: "real" },
+      { url: "/videos/detection/Fake7.mp4", label: "fake" }
     ]
   },
 
@@ -66,8 +66,8 @@ export const detectionSets = [
   {
     title: "Breaking Stories",
     videos: [
-      { url: "/videos/detection/Real8.mp3", label: "real" },
-      { url: "/videos/detection/Fake8.mp3", label: "fake" }
+      { url: "/videos/detection/Real8.mp4", label: "real" },
+      { url: "/videos/detection/Fake8.mp4", label: "fake" }
     ]
   },
 
@@ -75,8 +75,8 @@ export const detectionSets = [
   {
     title: "Action & Moves",
     videos: [
-      { url: "/videos/detection/Fake9.mp3", label: "fake" },
-      { url: "/videos/detection/Fake99.mp3", label: "fake" }
+      { url: "/videos/detection/Fake9.mp4", label: "fake" },
+      { url: "/videos/detection/Fake99.mp4", label: "fake" }
     ]
   },
 
@@ -84,8 +84,8 @@ export const detectionSets = [
   {
     title: "Style on Screen",
     videos: [
-      { url: "/videos/detection/Fake10.mp3", label: "fake" },
-      { url: "/videos/detection/Fake11.mp3", label: "fake" }
+      { url: "/videos/detection/Fake10.mp4", label: "fake" },
+      { url: "/videos/detection/Fake11.mp4", label: "fake" }
     ]
   }
 ];
