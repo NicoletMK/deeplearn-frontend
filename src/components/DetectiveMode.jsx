@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { motion, AnimatePresence } from "framer-motion";
 
-const MIN_REASON_LEN = 12; // tweak if you want stricter/looser text length
+const MIN_REASON_LEN = 10;   // soft minimum to encourage substance
+const MAX_REASON_LEN = 120;  // hard maximum to keep responses concise
 
 const GROUP_SUBTITLES = {
   "Famous Faces Speaking Out": "Public speeches by famous people",
@@ -34,27 +35,23 @@ const FEATURE_OPTIONS = [
   "Context seems unlikely / too perfect"
 ];
 
-// Auto video for .mp4/.webm/.mov, audio for others
 function MediaPlayer({ src }) {
   const ext = (src.split(".").pop() || "").toLowerCase();
-  const isVideo = ["mp4", "webm", "mov"].includes(ext);
-  if (isVideo) {
-    const type = ext === "webm" ? "video/webm" : ext === "mov" ? "video/quicktime" : "video/mp4";
-    return (
-      <video controls className="w-full rounded shadow-xl max-w-xl">
-        <source src={src} type={type} />
-        Your browser does not support the video tag.
-      </video>
-    );
-  }
-  const type = ext === "mp3" ? "audio/mpeg" : "audio/mp4";
+  const type =
+    ext === "webm"
+      ? "video/webm"
+      : ext === "mov"
+      ? "video/quicktime"
+      : "video/mp4";
+
   return (
-    <audio controls className="w-full rounded shadow-xl max-w-xl">
+    <video controls className="w-full rounded shadow-xl max-w-xl">
       <source src={src} type={type} />
-      Your browser does not support the audio tag.
-    </audio>
+      Your browser does not support the video tag.
+    </video>
   );
 }
+
 
 function Chip({ checked, label, onToggle }) {
   return (
@@ -78,7 +75,7 @@ function Chip({ checked, label, onToggle }) {
 export default function DetectiveMode({ videoPairs, session = "pre", onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userId, setUserId] = useState("");
-  const [selectedIndices, setSelectedIndices] = useState([]); // can be [], [0], [1], or [0,1]
+  const [selectedIndices, setSelectedIndices] = useState([]); // [], [0], [1], [0,1]
   const [submitted, setSubmitted] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false); // only in post
   const [isCorrect, setIsCorrect] = useState(null);
@@ -88,6 +85,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
   const [otherFeature, setOtherFeature] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [confidence, setConfidence] = useState(3);
+  const [noClues, setNoClues] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("deeplearnUserId");
@@ -109,6 +107,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     setOtherFeature("");
     setReasoning("");
     setConfidence(3);
+    setNoClues(false);
   }, [currentIndex]);
 
   const total = videoPairs?.length || 0;
@@ -134,11 +133,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     );
   };
 
-  // ✅ Validation: allow 0, 1, or 2 selections.
-  // Still require evidence: (features ≥1) OR (reason ≥ MIN_REASON_LEN)
+  // ✅ Validation: allow 0/1/2 selections.
+  // Require evidence: (≥1 feature) OR (reason ≥ min chars) OR (noClues checked)
   const hasFeatureEvidence = featureSet.length > 0 || (otherFeature.trim().length > 0);
-  const hasReason = reasoning.trim().length >= MIN_REASON_LEN;
-  const canSubmit = hasFeatureEvidence || hasReason;
+  const reasonLen = reasoning.trim().length;
+  const reasonOk = reasonLen >= MIN_REASON_LEN;
+  const canSubmit = hasFeatureEvidence || reasonOk || noClues;
 
   const handleSubmit = async () => {
     if (submitted || !canSubmit) return;
@@ -174,7 +174,8 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
         featuresSelected: featureSet,
         otherFeature: otherFeature.trim() || null,
         reasoning: reasoning.trim() || null,
-        confidence
+        confidence,
+        noClues
       }
     };
 
@@ -195,11 +196,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     else if (onComplete) onComplete();
   };
 
-  // Reason counter
-  const reasonLen = reasoning.trim().length;
-  const reasonOk = reasonLen >= MIN_REASON_LEN;
-
-  // Titles per session (your chosen style)
+  // Titles per session
   const sessionTitle = session === "pre" ? "Warm-Up Detective" : "Master Detective";
 
   return (
@@ -218,10 +215,11 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
             <li><strong>Both</strong> might be AI-generated</li>
           </ul>
           <p className="mt-2">
-            Use the checkboxes to mark which clip(s) you believe are AI-generated. If you think both are real, leave both unchecked and submit.
+            Use the checkboxes to mark which clip(s) you believe are AI-generated.
+            If you think both are real, leave both unchecked and submit.
           </p>
           <p className="mt-1 text-sm text-gray-600">
-            After marking, explain what clues you noticed or select features that guided your decision.
+            Then, tell us what clues you noticed (optional) or write a short reason.
           </p>
         </div>
 
@@ -281,11 +279,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           </h2>
 
           <div className="space-y-4">
+            {/* Features */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
-                Features you noticed <span className="text-gray-500">(select all that apply)</span>
+                Features you noticed <span className="text-gray-500">(optional — select all that apply)</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className={`flex flex-wrap gap-2 ${noClues ? "opacity-50 pointer-events-none" : ""}`}>
                 {FEATURE_OPTIONS.map((opt) => (
                   <Chip
                     key={opt}
@@ -305,27 +304,45 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                 onChange={(e) => setOtherFeature(e.target.value)}
                 placeholder="Other feature you noticed (optional)"
                 className="mt-3 w-full border rounded-lg p-2"
+                disabled={noClues}
               />
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5"
+                  checked={noClues}
+                  onChange={(e) => setNoClues(e.target.checked)}
+                />
+                <span className="text-sm md:text-base text-gray-800">
+                  I didn’t notice any specific AI clues (everything looked real to me).
+                </span>
+              </div>
             </div>
 
+            {/* Reasoning */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
                 Explain your reasoning in 1–3 sentences.
+                <span className="ml-2 text-gray-500">
+                  ({MIN_REASON_LEN}/{MAX_REASON_LEN} suggested)
+                </span>
               </div>
               <textarea
                 value={reasoning}
                 onChange={(e) => setReasoning(e.target.value)}
                 rows={3}
-                placeholder={`What clues did you notice? (${MIN_REASON_LEN}+ characters OR pick at least one feature above)`}
+                maxLength={MAX_REASON_LEN}
+                placeholder={`What clues did you notice? (Write at least ${MIN_REASON_LEN} characters OR select a feature, OR check “no clues”)`}
                 className="w-full border rounded-lg p-3"
               />
               <div className="mt-1 text-xs">
                 <span className={`${reasonOk ? "text-green-700" : "text-red-600"}`}>
-                  {reasonLen}/{MIN_REASON_LEN} {reasonOk ? "✓" : "characters needed"}
+                  {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : "characters (≥" + MIN_REASON_LEN + " recommended)"}
                 </span>
               </div>
             </div>
 
+            {/* Confidence */}
             <div>
               <div className="font-semibold text-gray-900 mb-2">
                 How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
@@ -360,7 +377,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
 
               {!canSubmit && (
                 <div className="text-sm text-gray-700 text-center max-w-xl">
-                  To submit, please choose at least one feature <em>or</em> write a short reason ({MIN_REASON_LEN}+ characters).
+                  To submit, please do one of the following:
+                  <ul className="list-disc list-inside text-left">
+                    <li>Select at least one feature, or</li>
+                    <li>Write a short reason (≥ {MIN_REASON_LEN} characters), or</li>
+                    <li>Check “I didn’t notice any specific AI clues.”</li>
+                  </ul>
                 </div>
               )}
             </div>
