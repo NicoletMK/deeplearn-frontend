@@ -223,22 +223,16 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           {sessionTitle}
         </h1>
 
-        {/* Centered, easy-to-read instructions */}
         <div className="max-w-3xl mx-auto">
           <div className="bg-white/70 border border-orange-200 rounded-xl p-4 md:p-5 text-gray-900">
             <p className="text-lg font-semibold">Watch both clips carefully.</p>
-            <ul className="mt-2 space-y-1 text-left mx-auto w-fit text-sm md:text-base">
-              <li>• <strong>None</strong> might be AI-generated (both are real)</li>
-              <li>• <strong>One</strong> might be AI-generated</li>
-              <li>• <strong>Both</strong> might be AI-generated</li>
-            </ul>
             <p className="mt-3 text-sm md:text-base">
-              Use the checkboxes to mark which clip(s) you believe are AI-generated.
-              If you think both are real, leave both unchecked and submit.
+              Use the checkboxes to mark which clip(s) you believe are AI-generated.<br />
+              If you think both are real, leave both unchecked.
             </p>
             <p className="mt-2 text-sm md:text-base">
-              Then, share what clues you noticed by picking at least <strong>one</strong> option below
-              (choose <em>“{EVERYTHING_REAL}”</em> if you saw no clues), and optionally write a short reason.
+              Then, share what clues you noticed by picking at least one option below.
+              Last, write a brief reason.
             </p>
           </div>
         </div>
