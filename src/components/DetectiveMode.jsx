@@ -18,7 +18,11 @@ const GROUP_SUBTITLES = {
   "Style on Screen": "Trendy ads and fashion moments"
 };
 
+// Special, mutually exclusive option
+const EVERYTHING_REAL = "Everything looked real — I didn’t notice any AI clues";
+
 const FEATURE_OPTIONS = [
+  EVERYTHING_REAL,
   "Lip-sync mismatch",
   "Mouth not matching voice",
   "Blinking looks odd / too regular",
@@ -46,13 +50,21 @@ function MediaPlayer({ src }) {
   );
 }
 
-function Chip({ checked, label, onToggle }) {
+function Chip({ checked, label, onToggle, emphasis = false, disabled = false }) {
   return (
     <button
       type="button"
       onClick={onToggle}
-      className={`px-3 py-1 rounded-full border transition
-        ${checked ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300 hover:bg-blue-50"}`}
+      disabled={disabled}
+      className={`px-3 py-2 rounded-full border transition text-sm md:text-base
+        ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${
+          checked
+            ? "bg-blue-600 text-white border-blue-600"
+            : emphasis
+            ? "bg-yellow-100 border-yellow-400 hover:bg-yellow-200"
+            : "bg-white text-gray-800 border-gray-300 hover:bg-blue-50"
+        }`}
     >
       {label}
     </button>
@@ -74,7 +86,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
   const [isCorrect, setIsCorrect] = useState(null);
 
   // Answer board
-  const [featureSet, setFeatureSet] = useState([]);
+  const [featureSet, setFeatureSet] = useState([]); // must include >= 1 (EVERYTHING_REAL counts)
   const [otherFeature, setOtherFeature] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [confidence, setConfidence] = useState(3);
@@ -124,11 +136,28 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     );
   };
 
-  // Validation: allow 0/1/2 clip selections; require (features≥1 OR reason≥min)
-  const hasFeatureEvidence = featureSet.length > 0 || (otherFeature.trim().length > 0);
+  // Clue selection rules:
+  // - User must choose at least one FEATURE_OPTIONS item.
+  // - EVERYTHING_REAL is mutually exclusive with all other clues.
+  const toggleClue = (label) => {
+    setFeatureSet((prev) => {
+      const has = prev.includes(label);
+      if (label === EVERYTHING_REAL) {
+        // Selecting this clears all others
+        return has ? [] : [EVERYTHING_REAL];
+      }
+      // Selecting any other clue removes EVERYTHING_REAL if present
+      const next = has ? prev.filter((l) => l !== label) : [...prev.filter((l) => l !== EVERYTHING_REAL), label];
+      return next;
+    });
+  };
+
+  // Validation: allow 0/1/2 clip selections; REQUIRE >=1 clue (from list)
+  // Reasoning is encouraged (10–120) but not required.
+  const hasRequiredClue = featureSet.length > 0; // MUST choose one
   const reasonLen = reasoning.trim().length;
   const reasonOk = reasonLen >= MIN_REASON_LEN;
-  const canSubmit = hasFeatureEvidence || reasonOk;
+  const canSubmit = hasRequiredClue; // strict per your request
 
   const handleSubmit = async () => {
     if (submitted || !canSubmit) return;
@@ -161,9 +190,9 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       correct: allCorrect,
       videos: currentPair.videos.map((v) => v.url),
       prompts: {
-        featuresSelected: featureSet,
-        otherFeature: otherFeature.trim() || null,
-        reasoning: reasoning.trim() || null,
+        cluesChosen: featureSet, // includes EVERYTHING_REAL if picked
+        otherFeature: otherFeature.trim() || null, // optional free text
+        reasoning: reasoning.trim() || null,       // optional
         confidence
       }
     };
@@ -194,21 +223,24 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           {sessionTitle}
         </h1>
 
-        {/* Enriched instructions */}
-        <div className="text-base md:text-lg text-gray-800 max-w-3xl mx-auto">
-          <p>Watch both clips carefully.</p>
-          <ul className="list-disc list-inside text-left mt-2 text-sm md:text-base">
-            <li><strong>None</strong> might be AI-generated (both are real)</li>
-            <li><strong>One</strong> might be AI-generated</li>
-            <li><strong>Both</strong> might be AI-generated</li>
-          </ul>
-          <p className="mt-2">
-            Use the checkboxes to mark which clip(s) you believe are AI-generated.
-            If you think both are real, leave both unchecked and submit.
-          </p>
-          <p className="mt-1 text-sm text-gray-600">
-            Then, share what clues you noticed (optional) or write a short reason.
-          </p>
+        {/* Centered, easy-to-read instructions */}
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white/70 border border-orange-200 rounded-xl p-4 md:p-5 text-gray-900">
+            <p className="text-lg font-semibold">Watch both clips carefully.</p>
+            <ul className="mt-2 space-y-1 text-left mx-auto w-fit text-sm md:text-base">
+              <li>• <strong>None</strong> might be AI-generated (both are real)</li>
+              <li>• <strong>One</strong> might be AI-generated</li>
+              <li>• <strong>Both</strong> might be AI-generated</li>
+            </ul>
+            <p className="mt-3 text-sm md:text-base">
+              Use the checkboxes to mark which clip(s) you believe are AI-generated.
+              If you think both are real, leave both unchecked and submit.
+            </p>
+            <p className="mt-2 text-sm md:text-base">
+              Then, share what clues you noticed by picking at least <strong>one</strong> option below
+              (choose <em>“{EVERYTHING_REAL}”</em> if you saw no clues), and optionally write a short reason.
+            </p>
+          </div>
         </div>
 
         <div className="mt-4 mb-4">
@@ -225,7 +257,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
         </div>
 
         {/* Progress */}
-        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-2 00 rounded-full overflow-hidden mb-6">
+        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-6">
           <div className="h-3 bg-orange-500" style={{ width: `${((currentIndex + 1) / total) * 100}%` }} />
         </div>
 
@@ -262,65 +294,69 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
 
         {/* Answer Board */}
         <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto">
-          <h2 className="text-xl md:text-2xl font-bold text-orange-700 mb-3">
-            Why did you choose that?
+          <h2 className="text-xl md:text-2xl font-bold text-orange-700 mb-3 text-center">
+            What clues did you notice?
           </h2>
 
-          <div className="space-y-4">
-            {/* Features */}
-            <div>
-              <div className="font-semibold text-gray-900 mb-2">
-                What clues (if any) did you notice?{" "}
-                <span className="text-gray-500">(optional — select any that apply)</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {FEATURE_OPTIONS.map((opt) => (
+          {/* Clue chips - centered and clean */}
+          <div className="flex flex-col items-center">
+            <div className="flex flex-wrap justify-center gap-2 max-w-3xl">
+              {FEATURE_OPTIONS.map((opt, idx) => {
+                const checked = featureSet.includes(opt);
+                const isEverything = opt === EVERYTHING_REAL;
+                // If EVERYTHING_REAL is selected, other chips are disabled; if any other is selected, EVERYTHING_REAL is disabled
+                const disableThis =
+                  (featureSet.includes(EVERYTHING_REAL) && !isEverything) ||
+                  (isEverything && featureSet.some((o) => o !== EVERYTHING_REAL));
+                return (
                   <Chip
                     key={opt}
                     label={opt}
-                    checked={featureSet.includes(opt)}
-                    onToggle={() =>
-                      setFeatureSet((prev) =>
-                        prev.includes(opt) ? prev.filter((f) => f !== opt) : [...prev, opt]
-                      )
-                    }
+                    checked={checked}
+                    onToggle={() => toggleClue(opt)}
+                    emphasis={idx === 0} // highlight the "Everything looked real" option
+                    disabled={disableThis}
                   />
-                ))}
-              </div>
+                );
+              })}
+            </div>
+
+            {/* Optional free-text & reason */}
+            <div className="mt-4 w-full max-w-3xl">
               <input
                 type="text"
                 value={otherFeature}
                 onChange={(e) => setOtherFeature(e.target.value)}
                 placeholder="Other clue you noticed (optional)"
-                className="mt-3 w-full border rounded-lg p-2"
+                className="w-full border rounded-lg p-2"
+                disabled={featureSet.includes(EVERYTHING_REAL)}
               />
             </div>
 
-            {/* Reasoning */}
-            <div>
-              <div className="font-semibold text-gray-900 mb-2">
-                Explain your reasoning in 1–3 sentences.
-                <span className="ml-2 text-gray-500">
-                  ({MIN_REASON_LEN}/{MAX_REASON_LEN} suggested)
-                </span>
+            <div className="mt-4 w-full max-w-3xl">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-gray-900">
+                  Explain your reasoning in 1–3 sentences
+                  <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} suggested)</span>
+                </div>
               </div>
               <textarea
                 value={reasoning}
                 onChange={(e) => setReasoning(e.target.value)}
                 rows={3}
                 maxLength={MAX_REASON_LEN}
-                placeholder={`What clues did you notice? (Write at least ${MIN_REASON_LEN} characters OR select any feature above)`}
-                className="w-full border rounded-lg p-3"
+                placeholder={`Write a short reason (optional). If you saw no clues, you can skip this after choosing “${EVERYTHING_REAL}”.`}
+                className="mt-2 w-full border rounded-lg p-3"
+                disabled={false}
               />
               <div className="mt-1 text-xs">
-                <span className={`${reasonOk ? "text-green-700" : "text-red-600"}`}>
+                <span className={`${reasonOk ? "text-green-700" : "text-gray-600"}`}>
                   {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} recommended)`}
                 </span>
               </div>
             </div>
 
-            {/* Confidence */}
-            <div>
+            <div className="mt-4 w-full max-w-3xl">
               <div className="font-semibold text-gray-900 mb-2">
                 How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
               </div>
@@ -345,16 +381,17 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
             <div className="flex flex-col items-center gap-2">
               <button
                 onClick={handleSubmit}
-                disabled={!canSubmit}
+                disabled={!hasRequiredClue}
                 className={`px-8 py-3 text-white text-lg font-bold rounded-full
-                  ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                  ${!hasRequiredClue ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
               >
                 Submit Answer
               </button>
 
-              {!canSubmit && (
+              {!hasRequiredClue && (
                 <div className="text-sm text-gray-700 text-center max-w-xl">
-                  To submit, please either select at least one feature, or write a short reason (≥ {MIN_REASON_LEN} characters).
+                  To submit, please pick at least <strong>one</strong> clue above.
+                  If you didn’t notice any, choose <em>“{EVERYTHING_REAL}”</em>.
                 </div>
               )}
             </div>
