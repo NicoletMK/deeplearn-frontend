@@ -1,18 +1,16 @@
-// src/utils/firebaseConfig.js
-
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Your Firebase configuration
+// Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyD7JHQAt-RAXfpuQBCFqcNOA9PzHV2DCI4",
-  authDomain: "deeplearn-app.firebaseapp.com",
-  projectId: "deeplearn-app",
-  storageBucket: "deeplearn-app.appspot.com",
-  messagingSenderId: "83811699934",
-  appId: "1:83811699934:web:952243386f4a65ad9c864f",
-  measurementId: "G-DG32B1CT81"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -21,7 +19,7 @@ const app = initializeApp(firebaseConfig);
 // Firestore DB
 const db = getFirestore(app);
 
-// Analytics (optional)
+// Analytics
 let analytics = null;
 isSupported().then((yes) => {
   if (yes) analytics = getAnalytics(app);

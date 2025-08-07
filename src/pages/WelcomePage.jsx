@@ -19,40 +19,63 @@ export default function WelcomePage({ onStart, onExit }) {
       localStorage.setItem('deeplearnUserId', newId);
       setUserId(newId);
     }
+
+    // Try resending saved failed submissions
+    const unsent = localStorage.getItem('deeplearnUnsent');
+    if (unsent && navigator.onLine) {
+      const data = JSON.parse(unsent);
+      sendToBackend(data, true);
+    }
   }, []);
 
   const toggleMenu = () => setShowMenu(!showMenu);
+
+  const sendToBackend = async (data, isRetry = false) => {
+    try {
+      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
+      const response = await fetch(`${backend}/api/welcome`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      console.log(isRetry ? '✅ Retried submission success' : '✅ Submitted to backend');
+
+      // Clear localStorage if retry was successful
+      if (isRetry) {
+        localStorage.removeItem('deeplearnUnsent');
+      }
+    } catch (error) {
+      console.error('❌ Submission failed:', error);
+
+      // Save to localStorage for retry later
+      if (!isRetry) {
+        localStorage.setItem('deeplearnUnsent', JSON.stringify(data));
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
-      const response = await fetch(`${backend}/api/welcome`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          firstName,
-          lastName,
-          age,
-          grade,
-          timestamp: new Date().toISOString(),
-        }),
-      });
+    const payload = {
+      userId,
+      firstName,
+      lastName,
+      age,
+      grade,
+      timestamp: new Date().toISOString(),
+    };
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      console.log('✅ Submitted to backend');
-      onStart(); // Go to next screen
-    } catch (error) {
-      console.error('❌ Submission failed:', error);
-      alert('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Navigate immediately for faster UX
+    onStart();
+
+    // Send data in background
+    sendToBackend(payload);
+
+    setLoading(false);
   };
 
   return (
@@ -149,7 +172,7 @@ export default function WelcomePage({ onStart, onExit }) {
               disabled={loading}
               className={`bg-green-500 text-white font-bold py-3 rounded-md transition text-lg ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"}`}
             >
-              {loading ? "Submitting..." : "🚀 Get Started"}
+              {loading ? "Starting..." : "🚀 Get Started"}
             </button>
           </form>
         </div>
