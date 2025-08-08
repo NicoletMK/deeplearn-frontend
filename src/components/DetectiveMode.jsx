@@ -152,12 +152,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     });
   };
 
-  // Validation: allow 0/1/2 clip selections; REQUIRE >=1 clue (from list)
-  // Reasoning is encouraged (10–120) but not required.  
-  const hasRequiredClue = featureSet.length > 0; // MUST choose one
+  // ===== Validation (Policy C) =====
+  // Require: at least one clue AND a short reason (≥ MIN_REASON_LEN)
+  const hasRequiredClue = featureSet.length > 0;
   const reasonLen = reasoning.trim().length;
   const reasonOk = reasonLen >= MIN_REASON_LEN;
-  const canSubmit = hasRequiredClue && reasonok // strict per your request
+  const canSubmit = hasRequiredClue && reasonOk;
 
   const handleSubmit = async () => {
     if (submitted || !canSubmit) return;
@@ -192,7 +192,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       prompts: {
         cluesChosen: featureSet, // includes EVERYTHING_REAL if picked
         otherFeature: otherFeature.trim() || null, // optional free text
-        reasoning: reasoning.trim() || null,       // optional
+        reasoning: reasoning.trim(),               // required by UI policy C
         confidence
       }
     };
@@ -223,31 +223,31 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           {sessionTitle}
         </h1>
 
-<div className="max-w-3xl mx-auto">
-  <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-    <p className="text-xl font-bold text-orange-700 mb-3">
-      🎥👀 Watch both clips carefully.
-    </p>
+        {/* Centered, easy-to-read instructions with emojis */}
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
+            <p className="text-xl font-bold text-orange-700 mb-3">
+              🎥👀 Watch both clips carefully.
+            </p>
 
-    <p className="text-base md:text-lg leading-relaxed mb-3">
-      ☑️🤖 Use the checkboxes to mark which clip(s) you believe are AI-generated.
-    </p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              ☑️🤖 Use the checkboxes to mark which clip(s) you believe are AI-generated.
+            </p>
 
-    <p className="text-base md:text-lg leading-relaxed mb-3">
-      🙅‍♂️🎯 If you think both are real, leave both unchecked.
-    </p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              🙅‍♂️🎯 If you think both are real, leave both unchecked.
+            </p>
 
-    <p className="text-base md:text-lg leading-relaxed mb-3">
-      🔍💡 Then, share what clues you noticed by picking any option(s) below.
-    </p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              🔍💡 Then, share what clues you noticed by picking
+              <span className="font-semibold text-orange-700"> at least one</span> option below.
+            </p>
 
-    <p className="text-base md:text-lg leading-relaxed">
-      ✏️🗒️ Finally, write a brief reason.
-    </p>
-  </div>
-</div>
-
-
+            <p className="text-base md:text-lg leading-relaxed">
+              ✏️🗒️ Finally, write a brief reason.
+            </p>
+          </div>
+        </div>
 
         <div className="mt-4 mb-4">
           <div className="text-sm md:text-base text-gray-700">
@@ -343,7 +343,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-gray-900">
                   Explain your reasoning in 1–3 sentences
-                  <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} suggested)</span>
+                  <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} required)</span>
                 </div>
               </div>
               <textarea
@@ -351,12 +351,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                 onChange={(e) => setReasoning(e.target.value)}
                 rows={3}
                 maxLength={MAX_REASON_LEN}
+                placeholder={`Required: write a short reason (≥ ${MIN_REASON_LEN} characters).`}
                 className="mt-2 w-full border rounded-lg p-3"
-                disabled={false}
               />
               <div className="mt-1 text-xs">
-                <span className={`${reasonOk ? "text-green-700" : "text-gray-600"}`}>
-                  {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} recommended)`}
+                <span className={reasonOk ? "text-green-700" : "text-red-600"}>
+                  {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} needed)`}
                 </span>
               </div>
             </div>
@@ -386,17 +386,20 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
             <div className="flex flex-col items-center gap-2">
               <button
                 onClick={handleSubmit}
-                disabled={!hasRequiredClue}
+                disabled={!canSubmit}
                 className={`px-8 py-3 text-white text-lg font-bold rounded-full
-                  ${!hasRequiredClue ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+                  ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
               >
                 Submit Answer
               </button>
 
-              {!hasRequiredClue && (
+              {!canSubmit && (
                 <div className="text-sm text-gray-700 text-center max-w-xl">
-                  To submit, please pick at least <strong>one</strong> clue above.
-                  If you didn’t notice any, choose <em>“{EVERYTHING_REAL}”</em>.
+                  To submit, please:
+                  <ul className="list-disc list-inside text-left">
+                    {!hasRequiredClue && <li>Choose at least <strong>one</strong> clue above.</li>}
+                    {!reasonOk && <li>Write a brief reason (≥ {MIN_REASON_LEN} characters).</li>}
+                  </ul>
                 </div>
               )}
             </div>
