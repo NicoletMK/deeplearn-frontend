@@ -153,11 +153,11 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
   };
 
   // Validation: allow 0/1/2 clip selections; REQUIRE >=1 clue (from list)
-  // Reasoning is encouraged (10–120) but not required.
+  // Reasoning is encouraged (10–120) but not required.  
   const hasRequiredClue = featureSet.length > 0; // MUST choose one
   const reasonLen = reasoning.trim().length;
   const reasonOk = reasonLen >= MIN_REASON_LEN;
-  const canSubmit = hasRequiredClue; // strict per your request
+  const canSubmit = hasRequiredClue && reasonok // strict per your request
 
   const handleSubmit = async () => {
     if (submitted || !canSubmit) return;
@@ -226,26 +226,27 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
 <div className="max-w-3xl mx-auto">
   <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
     <p className="text-xl font-bold text-orange-700 mb-3">
-      Watch both clips carefully.
+      🎥👀 Watch both clips carefully.
     </p>
 
     <p className="text-base md:text-lg leading-relaxed mb-3">
-      Use the checkboxes to mark which clip(s) you believe are AI-generated.
+      ☑️🤖 Use the checkboxes to mark which clip(s) you believe are AI-generated.
     </p>
 
     <p className="text-base md:text-lg leading-relaxed mb-3">
-      If you think both are real, leave both unchecked.
+      🙅‍♂️🎯 If you think both are real, leave both unchecked.
     </p>
 
     <p className="text-base md:text-lg leading-relaxed mb-3">
-      Then, share what clues you noticed by picking <span className="font-semibold text-orange-700">at least one</span> option below.
+      🔍💡 Then, share what clues you noticed by picking any option(s) below.
     </p>
-    
-    <p className="text-base md:text-lg leading-relaxed mb-3">
-      Finally, write a brief reason.
+
+    <p className="text-base md:text-lg leading-relaxed">
+      ✏️🗒️ Finally, write a brief reason.
     </p>
   </div>
 </div>
+
 
 
         <div className="mt-4 mb-4">
@@ -350,7 +351,6 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                 onChange={(e) => setReasoning(e.target.value)}
                 rows={3}
                 maxLength={MAX_REASON_LEN}
-                placeholder={`Write a short reason (optional). If you saw no clues, you can skip this after choosing “${EVERYTHING_REAL}”.`}
                 className="mt-2 w-full border rounded-lg p-3"
                 disabled={false}
               />
