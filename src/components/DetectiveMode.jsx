@@ -152,7 +152,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     });
   };
 
-  // ===== Validation (Policy C) =====
+  // ===== Validation (Policy C strict) =====
   // Require: at least one clue AND a short reason (≥ MIN_REASON_LEN)
   const hasRequiredClue = featureSet.length > 0;
   const reasonLen = reasoning.trim().length;
@@ -190,9 +190,9 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       correct: allCorrect,
       videos: currentPair.videos.map((v) => v.url),
       prompts: {
-        cluesChosen: featureSet, // includes EVERYTHING_REAL if picked
+        cluesChosen: featureSet,                // includes EVERYTHING_REAL if picked
         otherFeature: otherFeature.trim() || null, // optional free text
-        reasoning: reasoning.trim(),               // required by UI policy C
+        reasoning: reasoning.trim(),            // required by UI policy C
         confidence
       }
     };
