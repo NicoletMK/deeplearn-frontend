@@ -13,8 +13,13 @@ export default function EthicsReflection({ onExit }) {
   const [impactSelections, setImpactSelections] = useState([]); // strings
   const [otherImpact, setOtherImpact] = useState("");           // single free-text
 
-  // Think-deeper single-choice
+  // Think-deeper single-choice + "Other idea"
   const [thinkChoice, setThinkChoice] = useState("");
+  const [thinkOther, setThinkOther] = useState("");
+
+  // Gamification
+  const [badge, setBadge] = useState(null); // {title, emoji, desc}
+  const [showBadge, setShowBadge] = useState(false);
 
   const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
   const MIN_REASON_LEN = 10;
@@ -134,15 +139,48 @@ export default function EthicsReflection({ onExit }) {
     []
   );
 
+  // Progress helpers
+  const total = scenarios.length;
+  const completedCount = completedIds.length;
+  const unlockedScenarioId = useMemo(() => {
+    // first scenario whose id is not in completedIds
+    const next = scenarios.find(s => !completedIds.includes(s.id));
+    return next ? next.id : null;
+  }, [completedIds, scenarios]);
+
+  const progressPercent = Math.round((completedCount / total) * 100);
+
+  // Badges per scenario
+  const getBadge = (scenarioId) => {
+    switch (scenarioId) {
+      case 1: return { title: "Trust Builder", emoji: "🛡️", desc: "You thought about consent and public trust." };
+      case 2: return { title: "Transparency Champ", emoji: "🪪", desc: "You weighed honesty in advertising." };
+      case 3: return { title: "Misinformation Defender", emoji: "🚫", desc: "You protected people from harmful fakes." };
+      case 4: return { title: "Kindness Keeper", emoji: "💛", desc: "You balanced humor with respect and consent." };
+      default: return { title: "Ethics Explorer", emoji: "✨", desc: "Great reflection!" };
+    }
+  };
+
   const resetScenarioState = () => {
     setImpactSelections([]);
     setOtherImpact("");
     setThinkChoice("");
+    setThinkOther("");
     setReflection("");
   };
 
+  const handleOpenUnlocked = () => {
+    if (unlockedScenarioId == null) return;
+    const next = scenarios.find(s => s.id === unlockedScenarioId);
+    if (!next) return;
+    setSelectedScenario(next);
+    resetScenarioState();
+    setStep("reflect");
+  };
+
   const handleScenarioSelect = (scenario) => {
-    if (completedIds.includes(scenario.id)) return;
+    // Only allow clicking the currently unlocked scenario
+    if (scenario.id !== unlockedScenarioId) return;
     setSelectedScenario(scenario);
     resetScenarioState();
     setStep("reflect");
@@ -159,14 +197,14 @@ export default function EthicsReflection({ onExit }) {
     const textOK = reflection.trim().length >= MIN_REASON_LEN;
     const impactsOK =
       impactSelections.length >= 1 || otherImpact.trim().length > 0;
-    const choiceOK = !!thinkChoice;
+    const choiceOK = !!thinkChoice || thinkOther.trim().length > 0;
     return textOK && impactsOK && choiceOK;
-  }, [selectedScenario, reflection, impactSelections, thinkChoice, otherImpact]);
+  }, [selectedScenario, reflection, impactSelections, otherImpact, thinkChoice, thinkOther]);
 
   const handleSubmit = async () => {
     if (!selectedScenario) return;
     if (!valid) {
-      alert("Please select impacts (≥1 or write your own), choose a response, and write 1–3 sentences (≥10 chars).");
+      alert("Please select impacts (≥1 or write your own), choose or write a response, and write 1–3 sentences (≥10 chars).");
       return;
     }
 
@@ -175,13 +213,18 @@ export default function EthicsReflection({ onExit }) {
         ? [...impactSelections, `Other: ${otherImpact.trim()}`]
         : impactSelections;
 
+    // If no preset choice but "Other idea" provided, store thinkChoice as Other: ...
+    const finalThinkChoice =
+      thinkChoice || (thinkOther.trim().length > 0 ? `Other: ${thinkOther.trim()}` : "");
+
     const payload = {
       userId,
       grade: grade || "",
       scenarioId: selectedScenario.id,
       scenarioTitle: selectedScenario.title,
       impacts: mergedImpacts,
-      thinkChoice,
+      thinkChoice: finalThinkChoice,
+      thinkOther: thinkOther.trim(), // raw for analysis
       reflectionText: reflection.trim(),
       timestamp: new Date().toISOString(),
       media: selectedScenario.media || null
@@ -197,49 +240,131 @@ export default function EthicsReflection({ onExit }) {
         const errorText = await res.text();
         throw new Error(`Failed to save reflection. Status: ${res.status} - ${errorText}`);
       }
+
+      // mark complete
       const updated = [...completedIds, selectedScenario.id];
       setCompletedIds(updated);
-      setSelectedScenario(null);
+
+      // badge popup
+      const earned = getBadge(selectedScenario.id);
+      setBadge(earned);
+      setShowBadge(true);
+
+      // reset scenario state but keep us on "reflect" view until user closes badge
       resetScenarioState();
-      setStep(updated.length === scenarios.length ? "done" : "choose");
+      setSelectedScenario(null);
+      // After badge close, we will open the next unlocked scenario (if any)
     } catch (err) {
       console.error("❌ Ethics reflection submission failed:", err);
       alert("There was a problem saving your reflection.");
     }
   };
 
+  // After badge modal "Continue", open next unlocked or finish
+  const handleBadgeContinue = () => {
+    setShowBadge(false);
+    if (completedIds.length === total) {
+      setStep("done");
+    } else {
+      setStep("choose");
+      handleOpenUnlocked();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-8">
-      <h1 className="text-3xl font-bold text-blue-900 mb-6">Think About It</h1>
+      {/* Progress header */}
+      <div className="w-full max-w-4xl mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-3xl font-bold text-blue-900">Think About It</h1>
+          <span className="text-sm text-blue-900 font-semibold">{completedCount}/{total} done</span>
+        </div>
 
+        {/* Progress bar */}
+        <div className="w-full h-3 bg-blue-200 rounded-full overflow-hidden">
+          <div
+            className="h-3 bg-orange-500"
+            style={{ width: `${progressPercent}%` }}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent}
+            role="progressbar"
+          />
+        </div>
+
+        {/* Step dots */}
+        <div className="mt-3 flex gap-3">
+          {scenarios.map((s) => {
+            const isDone = completedIds.includes(s.id);
+            const isUnlocked = s.id === unlockedScenarioId;
+            return (
+              <div key={s.id} className="flex items-center gap-1">
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold shadow
+                    ${isDone ? "bg-green-500" : isUnlocked ? "bg-orange-500" : "bg-blue-300"}`}
+                  title={s.title}
+                >
+                  {isDone ? "✓" : s.id}
+                </div>
+                <span className="text-xs text-blue-900 hidden sm:inline">{s.title.split(" ")[0]}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Choose view: sequential unlock with locks */}
       {step === "choose" && (
         <>
-          <p className="text-blue-800 mb-4">Choose one you haven't done yet:</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-6xl">
-            {scenarios.map((s) => (
-              <div
-                key={s.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`Select scenario: ${s.title}`}
-                onClick={() => handleScenarioSelect(s)}
-                onKeyDown={(e) => e.key === "Enter" && handleScenarioSelect(s)}
-                className={`cursor-pointer border-4 p-4 rounded-xl shadow-md transition ${
-                  completedIds.includes(s.id)
-                    ? "border-gray-300 bg-gray-100 opacity-60 pointer-events-none"
-                    : "border-white bg-blue-100 hover:border-orange-400"
-                }`}
-              >
-                <h2 className="font-bold text-lg text-blue-900 mb-2">{s.title}</h2>
-                <p className="text-blue-800">{s.description}</p>
-              </div>
-            ))}
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {scenarios.map((s) => {
+              const isDone = completedIds.includes(s.id);
+              const isUnlocked = s.id === unlockedScenarioId;
+              return (
+                <div
+                  key={s.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Scenario ${s.id}: ${s.title}`}
+                  onClick={() => handleScenarioSelect(s)}
+                  onKeyDown={(e) => e.key === "Enter" && handleScenarioSelect(s)}
+                  className={`border-4 p-4 rounded-xl shadow-md transition relative
+                    ${isDone ? "border-green-300 bg-green-50 opacity-80" :
+                      isUnlocked ? "border-white bg-blue-100 hover:border-orange-400 cursor-pointer" :
+                      "border-gray-300 bg-gray-100 opacity-60 pointer-events-none"}`}
+                >
+                  {!isUnlocked && !isDone && (
+                    <div className="absolute top-2 right-2 text-gray-500" aria-hidden>🔒</div>
+                  )}
+                  {isDone && (
+                    <div className="absolute top-2 right-2" aria-hidden>🏅</div>
+                  )}
+                  <h2 className="font-bold text-lg text-blue-900 mb-2">{s.title}</h2>
+                  <p className="text-blue-800 text-sm">{s.description}</p>
+                  {isUnlocked && (
+                    <div className="mt-3 text-xs text-orange-700 font-semibold">Unlocked — click to begin →</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Helpful CTA to start the next unlocked one */}
+          <div className="mt-6">
+            <button
+              onClick={handleOpenUnlocked}
+              disabled={!unlockedScenarioId}
+              className={`px-5 py-2 rounded font-bold text-white ${unlockedScenarioId ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"}`}
+            >
+              Start Next Scenario
+            </button>
           </div>
         </>
       )}
 
+      {/* Reflect view */}
       {step === "reflect" && selectedScenario && (
-        <div className="bg-white p-6 mt-6 rounded-xl shadow-md w-full max-w-2xl">
+        <div className="bg-white p-6 mt-2 rounded-xl shadow-md w-full max-w-2xl">
           <h3 className="text-xl font-bold mb-2 text-blue-900">
             {selectedScenario.title}
           </h3>
@@ -314,7 +439,7 @@ export default function EthicsReflection({ onExit }) {
               : ""}
           </div>
 
-          {/* 3) Think deeper (single choice) */}
+          {/* 3) Think deeper (single choice + other idea) */}
           <div className="mt-4">
             <p className="text-sm text-gray-700 mb-1">{selectedScenario.thinkPrompt}</p>
             <div className="flex flex-wrap gap-2">
@@ -332,15 +457,27 @@ export default function EthicsReflection({ onExit }) {
                 </button>
               ))}
             </div>
-            {!thinkChoice && (
-              <p className="text-xs text-red-600 mt-1">Choose one option.</p>
+
+            {/* Other idea (optional, counts as one) */}
+            <div className="mt-3 w-full">
+              <input
+                type="text"
+                value={thinkOther}
+                onChange={(e) => setThinkOther(e.target.value)}
+                placeholder="Other idea for how to handle this (optional)"
+                className="w-full border rounded-lg p-2"
+              />
+            </div>
+
+            {!thinkChoice && thinkOther.trim().length === 0 && (
+              <p className="text-xs text-red-600 mt-1">Choose one option or write your own idea.</p>
             )}
           </div>
 
           {/* Actions */}
           <div className="mt-6 flex items-center justify-between">
             <button onClick={() => setStep("choose")} className="text-gray-600 underline">
-              ← Choose another scenario
+              ← Back
             </button>
             <button
               onClick={handleSubmit}
@@ -354,13 +491,30 @@ export default function EthicsReflection({ onExit }) {
         </div>
       )}
 
+      {/* Badge modal after submit */}
+      {showBadge && badge && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border-4 border-yellow-200 p-8 max-w-md w-full text-center">
+            <div className="text-6xl mb-3">{badge.emoji}</div>
+            <h2 className="text-2xl font-bold text-blue-900 mb-2">{badge.title}</h2>
+            <p className="text-gray-800 mb-6">{badge.desc}</p>
+            <button
+              onClick={handleBadgeContinue}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
       {step === "done" && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-green-100 border-4 border-green-300 rounded-2xl p-8 max-w-lg w-full text-center shadow-xl">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-3xl font-bold text-green-800 mb-3">Great job!</h2>
             <p className="text-lg text-gray-800 mb-6">
-              You've thoughtfully reflected on all 4 real-life AI scenarios.<br />
+              You've thoughtfully reflected on all {total} AI scenarios.<br />
               You're becoming a mindful AI explorer!
             </p>
             <button
