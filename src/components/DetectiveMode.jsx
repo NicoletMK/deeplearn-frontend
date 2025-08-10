@@ -40,10 +40,19 @@ const FEATURE_OPTIONS = [
   "Context seems unlikely / too perfect"
 ];
 
+// Emoji per step (fallback to 🧩 if more steps than emojis)
+const EMOJIS = ["🎭", "🕶️", "😂", "💰", "📰", "🎤", "🧪", "🎬", "🧍", "🧠"];
+
 // Video-only player (all assets are .mp4)
-function MediaPlayer({ src }) {
+function MediaPlayer({ src, onPlay, onPause, onSeek }) {
   return (
-    <video controls className="w-full rounded shadow-xl max-w-xl">
+    <video
+      controls
+      className="w-full rounded shadow-xl max-w-xl"
+      onPlay={onPlay}
+      onPause={onPause}
+      onSeeked={(e) => onSeek && onSeek(e.currentTarget.currentTime)}
+    >
       <source src={src} type="video/mp4" />
       Your browser does not support the video tag.
     </video>
@@ -82,7 +91,6 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
   const [userId, setUserId] = useState("");
   const [selectedIndices, setSelectedIndices] = useState([]); // [], [0], [1], or [0,1]
   const [submitted, setSubmitted] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false); // post only
   const [isCorrect, setIsCorrect] = useState(null);
 
   // Answer board
@@ -90,6 +98,9 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
   const [otherFeature, setOtherFeature] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [confidence, setConfidence] = useState(3);
+
+  // Gamification badge modal
+  const [showBadge, setShowBadge] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("deeplearnUserId");
@@ -105,7 +116,6 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     // reset on group change
     setSelectedIndices([]);
     setSubmitted(false);
-    setShowFeedback(false);
     setIsCorrect(null);
     setFeatureSet([]);
     setOtherFeature("");
@@ -152,12 +162,31 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     });
   };
 
-  // ===== Validation (Policy C strict) =====
-  // Require: at least one clue AND a short reason (≥ MIN_REASON_LEN)
+  // ===== Validation =====
   const hasRequiredClue = featureSet.length > 0;
   const reasonLen = reasoning.trim().length;
   const reasonOk = reasonLen >= MIN_REASON_LEN;
   const canSubmit = hasRequiredClue && reasonOk;
+
+  // Encouragement badge content
+  const getBadge = () => {
+    // Theme by index (feel free to tweak messages)
+    const titles = ["Great Start, Detective!", "Clue Finder!", "Sharp Eyes!", "Final Case Solved!"];
+    const emojis  = ["🕵️‍♀️", "🔍", "⚡", "🏆"];
+    const idx = Math.min(currentIndex, titles.length - 1);
+    const title = titles[idx];
+    const emoji = emojis[idx];
+    // In post-session, include correctness
+    const desc =
+      session === "post"
+        ? isCorrect === true
+          ? "✅ Correct! You're nailing these fakes."
+          : isCorrect === false
+          ? "❌ Not quite — the next case will sharpen your skills."
+          : "Answer saved."
+        : "Answer saved. On to the next case!";
+    return { title, emoji, desc };
+  };
 
   const handleSubmit = async () => {
     if (submitted || !canSubmit) return;
@@ -173,10 +202,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       selectedActual.every((v, i) => v === fakeSet[i]);
 
     setSubmitted(true);
-    if (session === "post") {
-      setIsCorrect(allCorrect);
-      setShowFeedback(true);
-    }
+    setIsCorrect(allCorrect);
 
     const payload = {
       userId,
@@ -190,9 +216,9 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       correct: allCorrect,
       videos: currentPair.videos.map((v) => v.url),
       prompts: {
-        cluesChosen: featureSet,                // includes EVERYTHING_REAL if picked
-        otherFeature: otherFeature.trim() || null, // optional free text
-        reasoning: reasoning.trim(),            // required by UI policy C
+        cluesChosen: featureSet,                    // includes EVERYTHING_REAL if picked
+        otherFeature: otherFeature.trim() || null,  // optional free text
+        reasoning: reasoning.trim(),               // required
         confidence
       }
     };
@@ -207,21 +233,60 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
     } catch (err) {
       console.error("❌ Submission failed:", err);
     }
+
+    // Show encouragement badge (with correctness if post)
+    setShowBadge(true);
   };
 
   const handleNext = () => {
+    setShowBadge(false);
     if (currentIndex + 1 < total) setCurrentIndex(currentIndex + 1);
     else if (onComplete) onComplete();
   };
 
   const sessionTitle = session === "pre" ? "Warm-Up Detective" : "Master Detective";
 
+  // Progress percent for bar
+  const progressPct = Math.round(((currentIndex + (submitted ? 1 : 0)) / total) * 100);
+
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
       <div className="bg-yellow-50 border-4 border-orange-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600 mb-2">
-          {sessionTitle}
-        </h1>
+        {/* Header + progress */}
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600">{sessionTitle}</h1>
+          <div className="text-sm font-semibold text-orange-700">
+            {Math.min(currentIndex + (submitted ? 1 : 0), total)}/{total} done
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-2">
+          <div className="h-3 bg-orange-500" style={{ width: `${progressPct}%` }} />
+        </div>
+
+        {/* Emoji step dots (done/current/locked) */}
+        <div className="flex justify-center gap-3 mb-4">
+          {videoPairs.map((_, i) => {
+            const isDone = i < currentIndex || (i === currentIndex && submitted);
+            const isCurrent = i === currentIndex && !submitted;
+            const emoji = EMOJIS[i] || "🧩";
+            return (
+              <div key={i} className="relative">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center text-xl shadow
+                    ${isDone ? "bg-green-500 text-white" : isCurrent ? "bg-orange-500 text-white" : "bg-blue-200 text-blue-900"}`}
+                  title={`Case ${i + 1}`}
+                >
+                  {emoji}
+                </div>
+                {isDone && (
+                  <div className="absolute -top-2 -right-2">✅</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* Centered, easy-to-read instructions with emojis */}
         <div className="max-w-3xl mx-auto">
@@ -229,29 +294,21 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
             <p className="text-xl font-bold text-orange-700 mb-3">
               🎥👀 Watch both clips carefully.
             </p>
-
             <p className="text-base md:text-lg leading-relaxed mb-3">
-              ☑️🤖 Use the checkboxes to mark which clip(s) you believe are AI-generated.
+              ☑️🤖 Check the clip(s) you believe are AI-generated. Leave both unchecked if you think both are real.
             </p>
-
             <p className="text-base md:text-lg leading-relaxed mb-3">
-              🙅‍♂️🎯 If you think both are real, leave both unchecked.
+              🔍💡 Pick <span className="font-semibold text-orange-700">at least one</span> clue below.
             </p>
-
-            <p className="text-base md:text-lg leading-relaxed mb-3">
-              🔍💡 Then, share what clues you noticed by picking
-              <span className="font-semibold text-orange-700"> at least one</span> option below.
-            </p>
-
             <p className="text-base md:text-lg leading-relaxed">
-              ✏️🗒️ Finally, write a brief reason.
+              ✏️🗒️ Write a brief reason. Then submit to unlock the next case!
             </p>
           </div>
         </div>
 
         <div className="mt-4 mb-4">
           <div className="text-sm md:text-base text-gray-700">
-            Group <span className="font-semibold">{currentIndex + 1}</span> of{" "}
+            Case <span className="font-semibold">{currentIndex + 1}</span> of{" "}
             <span className="font-semibold">{total}</span>
           </div>
           <div className="text-xl md:text-2xl font-semibold text-gray-900 mt-1">
@@ -260,11 +317,6 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           {groupSubtitle && (
             <div className="text-sm md:text-base text-gray-600">{groupSubtitle}</div>
           )}
-        </div>
-
-        {/* Progress */}
-        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-6">
-          <div className="h-3 bg-orange-500" style={{ width: `${((currentIndex + 1) / total) * 100}%` }} />
         </div>
 
         <AnimatePresence mode="wait">
@@ -281,7 +333,12 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
               const selected = selectedIndices.includes(idxInView);
               return (
                 <div key={idxInView} className="flex flex-col items-center">
-                  <MediaPlayer src={media.url} />
+                  <MediaPlayer
+                    src={media.url}
+                    onPlay={() => {/* add analytics if desired */}}
+                    onPause={() => {/* add analytics if desired */}}
+                    onSeek={() => {/* add analytics if desired */}}
+                  />
                   <label className="mt-3 flex items-center gap-2 text-sm md:text-base">
                     <input
                       type="checkbox"
@@ -321,7 +378,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                     checked={checked}
                     onToggle={() => toggleClue(opt)}
                     emphasis={idx === 0} // highlight the "Everything looked real" option
-                    disabled={disableThis}
+                    disabled={disableThis || submitted}
                   />
                 );
               })}
@@ -335,7 +392,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                 onChange={(e) => setOtherFeature(e.target.value)}
                 placeholder="Other clue you noticed (optional)"
                 className="w-full border rounded-lg p-2"
-                disabled={featureSet.includes(EVERYTHING_REAL)}
+                disabled={featureSet.includes(EVERYTHING_REAL) || submitted}
               />
             </div>
 
@@ -353,6 +410,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                 maxLength={MAX_REASON_LEN}
                 placeholder={`Required: write a short reason (≥ ${MIN_REASON_LEN} characters).`}
                 className="mt-2 w-full border rounded-lg p-3"
+                disabled={submitted}
               />
               <div className="mt-1 text-xs">
                 <span className={reasonOk ? "text-green-700" : "text-red-600"}>
@@ -373,6 +431,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
                   value={confidence}
                   onChange={(e) => setConfidence(parseInt(e.target.value))}
                   className="w-full"
+                  disabled={submitted}
                 />
                 <div className="w-10 text-center font-semibold">{confidence}</div>
               </div>
@@ -380,7 +439,7 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
           </div>
         </div>
 
-        {/* Submit / Feedback / Next */}
+        {/* Submit / Next */}
         <div className="mt-4 flex flex-col items-center gap-3">
           {!submitted && (
             <div className="flex flex-col items-center gap-2">
@@ -404,43 +463,32 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
               )}
             </div>
           )}
-
-          {submitted && session === "pre" && (
-            <>
-              <div className="text-gray-700 text-lg">Answer saved.</div>
-              <button
-                onClick={handleNext}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full"
-              >
-                {currentIndex === total - 1 ? "Finish" : "Next"}
-              </button>
-            </>
-          )}
-
-          {submitted && session === "post" && showFeedback && (
-            <>
-              <div className={`text-2xl font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
-                {isCorrect ? "✅ Correct!" : "❌ Not quite."}
-              </div>
-
-              <div className="text-sm text-gray-700">
-                Ground truth fakes:{" "}
-                {currentPair.videos
-                  .map((v, i) => (v.label === "fake" ? (i === 0 ? "Clip A" : "Clip B") : null))
-                  .filter(Boolean)
-                  .join(" & ") || "None (both real)"}
-              </div>
-
-              <button
-                onClick={handleNext}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full mt-2"
-              >
-                {currentIndex === total - 1 ? "Finish" : "Next"}
-              </button>
-            </>
-          )}
         </div>
       </div>
+
+      {/* Badge modal after submit (encouragement + correctness if post) */}
+      {showBadge && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border-4 border-yellow-200 p-8 max-w-md w-full text-center">
+            {(() => {
+              const { title, emoji, desc } = getBadge();
+              return (
+                <>
+                  <div className="text-6xl mb-3">{emoji}</div>
+                  <h2 className="text-2xl font-bold text-blue-900 mb-2">{title}</h2>
+                  <p className="text-gray-800 mb-6">{desc}</p>
+                </>
+              );
+            })()}
+            <button
+              onClick={handleNext}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full"
+            >
+              {currentIndex === total - 1 ? "Finish" : "Continue"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
