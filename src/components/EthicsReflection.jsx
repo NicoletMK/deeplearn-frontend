@@ -9,14 +9,17 @@ export default function EthicsReflection({ onExit }) {
   const [grade, setGrade] = useState("");
   const [reflection, setReflection] = useState("");
 
-  // Shared UI state
+  // Impact selections + free-text "Other impact"
   const [impactSelections, setImpactSelections] = useState([]); // strings
-  const [thinkChoice, setThinkChoice] = useState("");           // single string
+  const [otherImpact, setOtherImpact] = useState("");           // single free-text
+
+  // Think-deeper single-choice
+  const [thinkChoice, setThinkChoice] = useState("");
 
   const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
   const MIN_REASON_LEN = 10;
 
-  // Pull app-level IDs created on the welcome page (no recollect)
+  // Pull app-level IDs created on the welcome page
   useEffect(() => {
     const storedId = localStorage.getItem("deeplearnUserId");
     const storedGrade = localStorage.getItem("deeplearnGrade");
@@ -29,7 +32,6 @@ export default function EthicsReflection({ onExit }) {
     if (storedGrade) setGrade(storedGrade);
   }, []);
 
-  // Scroll to top on step change
   useEffect(() => {
     if (step === "reflect") window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
@@ -134,6 +136,7 @@ export default function EthicsReflection({ onExit }) {
 
   const resetScenarioState = () => {
     setImpactSelections([]);
+    setOtherImpact("");
     setThinkChoice("");
     setReflection("");
   };
@@ -154,24 +157,30 @@ export default function EthicsReflection({ onExit }) {
   const valid = useMemo(() => {
     if (!selectedScenario) return false;
     const textOK = reflection.trim().length >= MIN_REASON_LEN;
-    const impactsOK = impactSelections.length >= 1;
+    const impactsOK =
+      impactSelections.length >= 1 || otherImpact.trim().length > 0;
     const choiceOK = !!thinkChoice;
     return textOK && impactsOK && choiceOK;
-  }, [selectedScenario, reflection, impactSelections, thinkChoice]);
+  }, [selectedScenario, reflection, impactSelections, thinkChoice, otherImpact]);
 
   const handleSubmit = async () => {
     if (!selectedScenario) return;
     if (!valid) {
-      alert("Please select impacts (≥1), choose a response, and write 1–3 sentences (≥10 chars).");
+      alert("Please select impacts (≥1 or write your own), choose a response, and write 1–3 sentences (≥10 chars).");
       return;
     }
+
+    const mergedImpacts =
+      otherImpact.trim().length > 0
+        ? [...impactSelections, `Other: ${otherImpact.trim()}`]
+        : impactSelections;
 
     const payload = {
       userId,
       grade: grade || "",
       scenarioId: selectedScenario.id,
       scenarioTitle: selectedScenario.title,
-      impacts: impactSelections,
+      impacts: mergedImpacts,
       thinkChoice,
       reflectionText: reflection.trim(),
       timestamp: new Date().toISOString(),
@@ -268,8 +277,22 @@ export default function EthicsReflection({ onExit }) {
                 </label>
               ))}
             </div>
-            {impactSelections.length === 0 && (
-              <p className="text-xs text-red-600 mt-1">Select at least one impact.</p>
+
+            {/* Other impact (optional, counts as one) */}
+            <div className="mt-4 w-full">
+              <input
+                type="text"
+                value={otherImpact}
+                onChange={(e) => setOtherImpact(e.target.value)}
+                placeholder="Other impact you can think of (optional)"
+                className="w-full border rounded-lg p-2"
+              />
+            </div>
+
+            {impactSelections.length === 0 && otherImpact.trim().length === 0 && (
+              <p className="text-xs text-red-600 mt-1">
+                Select at least one impact or write your own.
+              </p>
             )}
           </div>
 
