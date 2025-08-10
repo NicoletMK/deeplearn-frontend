@@ -149,6 +149,14 @@ export default function EthicsReflection({ onExit }) {
   }, [completedIds, scenarios]);
 
   const progressPercent = Math.round((completedCount / total) * 100);
+  // Emoji for each scenario id 
+  const scenarioEmojis = {
+    1: "🎭", // Famous Face, Unspoken Words
+    2: "🕶️", // The AI Supermodel in Your Feed
+    3: "😂", // The Face Swap Everyone’s Sharing
+    4: "💰", // Money Advice That Isn’t Real
+  };
+
 
   // Badges per scenario
   const getBadge = (scenarioId) => {
@@ -293,27 +301,24 @@ export default function EthicsReflection({ onExit }) {
         </div>
 
         {/* Step dots */}
-const scenarioEmojis = {
-  1: "🎭", // Famous Face
-  2: "🕶️", // AI Supermodel
-  3: "😂", // Face Swap
-  4: "💰"  // Fake Finance
-};
-
-// Progress dots / emoji tracker
-<div className="flex justify-center mb-4">
-  {scenarios.map((s) => (
-    <span
-      key={s.id}
-      className={`mx-1 text-2xl ${
-        completedIds.includes(s.id) ? "opacity-50" : ""
-      }`}
-    >
-      {scenarioEmojis[s.id]}
-    </span>
-  ))}
-</div>
-
+        <div className="mt-3 flex gap-3">
+          {scenarios.map((s) => {
+            const isDone = completedIds.includes(s.id);
+            const isUnlocked = s.id === unlockedScenarioId;
+            return (
+              <div key={s.id} className="flex items-center gap-1">
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold shadow
+                    ${isDone ? "bg-green-500" : isUnlocked ? "bg-orange-500" : "bg-blue-300"}`}
+                >
+                  {isDone ? "✓" : s.id}
+                </div>
+                <span className="text-xs text-blue-900 hidden sm:inline">{scenarioEmojis[s.id]}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Choose view: sequential unlock with locks */}
       {step === "choose" && (
