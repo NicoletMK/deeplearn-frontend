@@ -87,33 +87,10 @@ export default function EthicsReflection({ onExit }) {
           "Optional — brand’s choice"
         ],
         reflectionPrompt:
-          "Should ads disclose AI-generated models? Why? (1–3 sentences)"
+          "Should brands use AI-generated models? Why? (1–3 sentences)"
       },
       {
         id: 3,
-        title: "Money Advice That Isn’t Real",
-        description:
-          "A realistic ‘news’ clip promotes a can’t-miss investment using fake facts to lure viewers into spending money.",
-        media: { video: "/videos/ethics/Ethics3.mp4" },
-        impacts: [
-          "Could cause real financial harm to viewers",
-          "Erodes trust in legitimate news sources",
-          "Targets vulnerable or uninformed people",
-          "Spreads quickly through social media",
-          "Hurts reputations of real companies/people",
-          "Blurs real vs. fake financial information"
-        ],
-        thinkPrompt: "What’s the right response to harmful fake finance videos?",
-        thinkOptions: [
-          "Platforms should remove and penalize creators",
-          "Strong labels and sharing friction are enough",
-          "Let audiences decide — free speech first"
-        ],
-        reflectionPrompt:
-          "What responsibilities do creators and platforms have when fake money tips can hurt people? (1–3 sentences)"
-      },
-      {
-        id: 4,
         title: "The Face Swap Everyone’s Sharing",
         description:
           "Many different faces — celebrities, strangers, and friends — are swapped into the same funny clip without asking permission.",
@@ -134,6 +111,29 @@ export default function EthicsReflection({ onExit }) {
         ],
         reflectionPrompt:
           "When does face-swap humor cross the line, and why? (1–3 sentences)"
+      },
+      {
+        id: 4,
+        title: "Money Advice That Isn’t Real",
+        description:
+          "A realistic ‘news’ clip promotes a can’t-miss investment using fake facts to lure viewers into spending money.",
+        media: { video: "/videos/ethics/Ethics3.mp4" },
+        impacts: [
+          "Could cause real financial harm to viewers",
+          "Erodes trust in legitimate news sources",
+          "Targets vulnerable or uninformed people",
+          "Spreads quickly through social media",
+          "Hurts reputations of real companies/people",
+          "Blurs real vs. fake financial information"
+        ],
+        thinkPrompt: "What’s the right response to harmful fake finance videos?",
+        thinkOptions: [
+          "Platforms should remove and penalize creators",
+          "Strong labels and sharing friction are enough",
+          "Let audiences decide — free speech first"
+        ],
+        reflectionPrompt:
+          "What responsibilities do creators and platforms have when fake money tips can hurt people? (1–3 sentences)"
       }
     ],
     []
@@ -155,8 +155,8 @@ export default function EthicsReflection({ onExit }) {
     switch (scenarioId) {
       case 1: return { title: "Trust Builder", emoji: "🛡️", desc: "You thought about consent and public trust." };
       case 2: return { title: "Transparency Champ", emoji: "🪪", desc: "You weighed honesty in advertising." };
-      case 3: return { title: "Misinformation Defender", emoji: "🚫", desc: "You protected people from harmful fakes." };
-      case 4: return { title: "Kindness Keeper", emoji: "💛", desc: "You balanced humor with respect and consent." };
+      case 3: return { title: "Kindness Keeper", emoji: "💛", desc: "You balanced humor with respect and consent." };
+      case 4: return { title: "Misinformation Defender", emoji: "🚫", desc: "You protected people from harmful fakes." };
       default: return { title: "Ethics Explorer", emoji: "✨", desc: "Great reflection!" };
     }
   };
@@ -293,25 +293,27 @@ export default function EthicsReflection({ onExit }) {
         </div>
 
         {/* Step dots */}
-        <div className="mt-3 flex gap-3">
-          {scenarios.map((s) => {
-            const isDone = completedIds.includes(s.id);
-            const isUnlocked = s.id === unlockedScenarioId;
-            return (
-              <div key={s.id} className="flex items-center gap-1">
-                <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold shadow
-                    ${isDone ? "bg-green-500" : isUnlocked ? "bg-orange-500" : "bg-blue-300"}`}
-                  title={s.title}
-                >
-                  {isDone ? "✓" : s.id}
-                </div>
-                <span className="text-xs text-blue-900 hidden sm:inline">{s.title.split(" ")[0]}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+const scenarioEmojis = {
+  1: "🎭", // Famous Face
+  2: "🕶️", // AI Supermodel
+  3: "😂", // Face Swap
+  4: "💰"  // Fake Finance
+};
+
+// Progress dots / emoji tracker
+<div className="flex justify-center mb-4">
+  {scenarios.map((s) => (
+    <span
+      key={s.id}
+      className={`mx-1 text-2xl ${
+        completedIds.includes(s.id) ? "opacity-50" : ""
+      }`}
+    >
+      {scenarioEmojis[s.id]}
+    </span>
+  ))}
+</div>
+
 
       {/* Choose view: sequential unlock with locks */}
       {step === "choose" && (
