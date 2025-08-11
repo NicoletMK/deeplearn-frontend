@@ -301,11 +301,11 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
             <p className="text-base md:text-lg leading-relaxed mb-3">
               ☑️🤖 Check the clip(s) you believe are AI-generated. 
             </p>
-                        <p className="text-base md:text-lg leading-relaxed mb-3">
+             <p className="text-base md:text-lg leading-relaxed mb-3">
               🌟🙅Leave both unchecked if you think both are real.
             </p>
             <p className="text-base md:text-lg leading-relaxed mb-3">
-              🔍💡 Pick at least one clue that looks AI-generated, or click "Everything looked real" if both no AI clues noticed.
+              🔍💡 Pick at least one clue that looks AI-generated, or click "Everything looked real" if no AI clues noticed.
             </p>
             <p className="text-base md:text-lg leading-relaxed">
               ✏️🗒️ Write a brief reason. Then submit to unlock the next case!
