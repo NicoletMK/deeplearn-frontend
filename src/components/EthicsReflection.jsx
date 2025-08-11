@@ -281,45 +281,52 @@ export default function EthicsReflection({ onExit }) {
 
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-8">
-      {/* Progress header */}
-      <div className="w-full max-w-4xl mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-blue-900">Think About It</h1>
-          <span className="text-sm text-blue-900 font-semibold">{completedCount}/{total} done</span>
-        </div>
+{/* Progress header */}
+<div className="w-full max-w-4xl mb-6 text-center">
+  <h1 className="text-3xl font-bold text-blue-900 mb-2">
+    Shaping Our AI Future
+  </h1>
+  <span className="text-sm text-blue-900 font-semibold block mb-3">
+    {completedCount}/{total} done
+  </span>
 
-        {/* Progress bar 
-        <div className="w-full h-3 bg-blue-200 rounded-full overflow-hidden">
+  {/* Progress bar */}
+  <div className="w-full h-3 bg-blue-200 rounded-full overflow-hidden mb-3">
+    <div
+      className="h-3 bg-orange-500"
+      style={{ width: `${progressPercent}%` }}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={progressPercent}
+      role="progressbar"
+    />
+  </div>
+
+  {/* Step dots */}
+  <div className="flex justify-center gap-4">
+    {scenarios.map((s) => {
+      const isDone = completedIds.includes(s.id);
+      const isUnlocked = s.id === unlockedScenarioId;
+      return (
+        <div key={s.id} className="flex flex-col items-center">
           <div
-            className="h-3 bg-orange-500"
-            style={{ width: `${progressPercent}%` }}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progressPercent}
-            role="progressbar"
-          />
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-bold shadow
+              ${isDone ? "bg-green-500" : isUnlocked ? "bg-orange-500" : "bg-blue-300"}`}
+          >
+            {isDone ? "✓" : s.id}
+          </div>
+          <span
+            className="text-blue-900 mt-1"
+            style={{ fontSize: "2rem" }}
+          >
+            {scenarioEmojis[s.id]}
+          </span>
         </div>
-        */}
+      );
+    })}
+  </div>
+</div>
 
-        {/* Step dots */}
-        <div className="mt-3 flex gap-3">
-          {scenarios.map((s) => {
-            const isDone = completedIds.includes(s.id);
-            const isUnlocked = s.id === unlockedScenarioId;
-            return (
-              <div key={s.id} className="flex items-center gap-1">
-                <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold shadow
-                    ${isDone ? "bg-green-500" : isUnlocked ? "bg-orange-500" : "bg-blue-300"}`}
-                >
-                  {isDone ? "✓" : s.id}
-                </div>
-               <span className="text-blue-900 hidden sm:inline" style={{ fontSize: "2rem" }}>{scenarioEmojis[s.id]}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Choose view: sequential unlock with locks */}
       {step === "choose" && (
