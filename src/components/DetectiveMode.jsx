@@ -254,7 +254,11 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
       <div className="bg-yellow-50 border-4 border-orange-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
         {/* Header + progress */}
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600">{sessionTitle}</h1>
+          <div className="flex justify-center">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600">
+              {sessionTitle}
+            </h1>
+          </div>
           <div className="text-sm font-semibold text-orange-700">
             {Math.min(currentIndex + (submitted ? 1 : 0), total)}/{total} done
           </div>
@@ -291,14 +295,17 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
         {/* Centered, easy-to-read instructions with emojis */}
         <div className="max-w-3xl mx-auto">
           <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-            <p className="text-xl font-bold text-orange-700 mb-3">
+            <p className="text-base md:text-lg leading-relaxed mb-3">
               🎥👀 Watch both clips carefully.
             </p>
             <p className="text-base md:text-lg leading-relaxed mb-3">
-              ☑️🤖 Check the clip(s) you believe are AI-generated. Leave both unchecked if you think both are real.
+              ☑️🤖 Check the clip(s) you believe are AI-generated. 
+            </p>
+                        <p className="text-base md:text-lg leading-relaxed mb-3">
+              🌟🙅Leave both unchecked if you think both are real.
             </p>
             <p className="text-base md:text-lg leading-relaxed mb-3">
-              🔍💡 Pick <span className="font-semibold text-orange-700">at least one</span> clue below.
+              🔍💡 Pick at least one clue that looks AI-generated, or click "Everything looked real" if both no AI clues noticed.
             </p>
             <p className="text-base md:text-lg leading-relaxed">
               ✏️🗒️ Write a brief reason. Then submit to unlock the next case!
