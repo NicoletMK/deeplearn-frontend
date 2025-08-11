@@ -288,7 +288,7 @@ export default function EthicsReflection({ onExit }) {
           <span className="text-sm text-blue-900 font-semibold">{completedCount}/{total} done</span>
         </div>
 
-        {/* Progress bar */}
+        {/* Progress bar 
         <div className="w-full h-3 bg-blue-200 rounded-full overflow-hidden">
           <div
             className="h-3 bg-orange-500"
@@ -299,6 +299,7 @@ export default function EthicsReflection({ onExit }) {
             role="progressbar"
           />
         </div>
+        */}
 
         {/* Step dots */}
         <div className="mt-3 flex gap-3">
@@ -313,7 +314,7 @@ export default function EthicsReflection({ onExit }) {
                 >
                   {isDone ? "✓" : s.id}
                 </div>
-                <span className="text-xs text-blue-900 hidden sm:inline">{scenarioEmojis[s.id]}</span>
+               <span className="text-blue-900 hidden sm:inline" style={{ fontSize: "2rem" }}>{scenarioEmojis[s.id]}</span>
               </div>
             );
           })}
