@@ -6,13 +6,13 @@ const MIN_REASON_LEN = 10;
 const MAX_REASON_LEN = 120;
 
 const GROUP_SUBTITLES = {
-  "Famous Faces Speaking Out": "Public speeches by famous people",
-  "Tech Visionary Speaks": "Talks from a well-known tech leader",
+  "Glamous Speeches": "Public speeches by famous people",
+  "Tech Visions": "Talks from a well-known tech leader",
   "Science in Action": "Scientists sharing discoveries",
-  "Tales of Legends": "Stories about larger-than-life figures",
+  "Big & Beyond": "Oversized people and animals",
   "Laugh Out Loud": "Clips made to make you giggle",
   "Meet the Guys": "Short introductions from different men",
-  "Acts of Kindness": "Doing good and helping others",
+  "Charity Champions": "Inspiring acts of giving that make a difference"
   "Breaking Stories": "Current events and reports",
   "Action & Moves": "High-energy action and dramatic moves",
   "Style on Screen": "Trendy ads and fashion moments"
