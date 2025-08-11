@@ -251,22 +251,22 @@ export default function DetectiveMode({ videoPairs, session = "pre", onComplete 
 
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
-      <div className="bg-yellow-50 border-4 border-orange-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
+      <div className="bg-yellow-50 border-4 border-blue-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
         {/* Header + progress */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex justify-center">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-orange-600">
+            <h1 className="text-1xl md:text-2xl font-extrabold text-blue-600">
               {sessionTitle}
             </h1>
           </div>
-          <div className="text-sm font-semibold text-orange-700">
+          <div className="text-sm font-semibold text-blue-700">
             {Math.min(currentIndex + (submitted ? 1 : 0), total)}/{total} done
           </div>
         </div>
 
         {/* Progress bar */}
         <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-2">
-          <div className="h-3 bg-orange-500" style={{ width: `${progressPct}%` }} />
+          <div className="h-3 bg-blue-500" style={{ width: `${progressPct}%` }} />
         </div>
 
         {/* Emoji step dots (done/current/locked) */}
