@@ -284,7 +284,7 @@ export default function EthicsReflection({ onExit }) {
 {/* Progress header */}
 <div className="w-full max-w-4xl mb-6 text-center">
   <h1 className="text-3xl font-bold text-blue-900 mb-2">
-    Shaping Our AI Future
+    Reflecting on AI's Impact
   </h1>
   <span className="text-sm text-blue-900 font-semibold block mb-3">
     {completedCount}/{total} done
