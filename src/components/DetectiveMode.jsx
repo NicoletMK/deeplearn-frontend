@@ -12,7 +12,7 @@ const GROUP_SUBTITLES = {
   "Big & Beyond": "Oversized people and animals",
   "Laugh Out Loud": "Clips made to make you giggle",
   "Meet the Guys": "Short introductions from different men",
-  "Charity Champions": "Inspiring acts of giving that make a difference"
+  "Charity Champions": "Inspiring acts of giving that make a difference",
   "Breaking Stories": "Current events and reports",
   "Action & Moves": "High-energy action and dramatic moves",
   "Style on Screen": "Trendy ads and fashion moments"
