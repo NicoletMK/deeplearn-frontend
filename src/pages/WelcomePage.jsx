@@ -195,15 +195,15 @@ export default function WelcomePage({ onStart, onExit }) {
       {showAbout && (
         <div className="fixed inset-0 z-30 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="about-title">
           <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" type="button" />
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-blue-100 p-6 mx-4">
-            <h2 id="about-title" className="text-2xl font-extrabold text-blue-600 mb-2">About DeepLearn</h2>
+            <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
+              <h2 className="text-lg font-bold text-blue-700">About DeepLearn </h2>
             <ul className="text-gray-800 space-y-1 mb-4">
               <li>• Watch fun videos and guess if they’re real or fake.</li>
               <li>• Explore how AI videos are made.</li>
               <li>• Reflect on the impact of AI on what we see online.</li>
             </ul>
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
-              <h3 className="text-lg font-bold text-blue-700">Dataset Credits (Quick)</h3>
+              <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <p className="text-gray-800 mt-1">
                 Using a curated, kid-safe subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
               </p>
