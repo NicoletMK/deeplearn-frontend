@@ -1,5 +1,5 @@
 import React from "react";
-import { Database } from "lucide-react"; // optional (remove if not using icons)
+import { Database } from "lucide-react";
 
 export default function IntroCreditsPage({ onContinue, onBack }) {
   return (
