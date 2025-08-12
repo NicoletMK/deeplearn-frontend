@@ -207,13 +207,9 @@ export default function WelcomePage({ onStart, onExit }) {
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <ul className="text-gray-700 mt-2 space-y-1">
-                <li>• Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025) </li>
-                <li>• License: CC BY-SA 4.0 </li>
+                <li>• Using a subset of <span className="font-semibold" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Deepfake-Eval-2024</span> (Chandra et al., 2025) </li>
+                <li>• License: <span className="font-semibold" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</span> </li>
               </ul>
-              <div className="flex flex-wrap gap-3 mt-3">
-                <a className="text-sm text-yellow-500 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
-                <a className="text-sm text-yellow-500 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
-              </div>
             </div>
             <div className="flex items-center justify-end gap-2">
               <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
