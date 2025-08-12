@@ -96,15 +96,6 @@ export default function WelcomePage({ onStart, onExit }) {
           >
             <button
               onClick={() => {
-                onExit();
-                setShowMenu(false);
-              }}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
-            >
-              🔙 Exit to Home
-            </button>
-            <button
-              onClick={() => {
                 alert('DeepLearn helps you explore deepfake and AI ethics in a fun, interactive way!');
                 setShowMenu(false);
               }}
