@@ -202,24 +202,24 @@ export default function WelcomePage({ onStart, onExit }) {
               <li>• Explore how AI videos are made.</li>
               <li>• Reflect on the impact of AI on what we see online.</li>
             </ul>
+          </div>  
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <p className="text-gray-800 mt-1">
-                Using a curated, kid-safe subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
+                Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
               </p>
               <ul className="text-gray-700 mt-2 space-y-1">
                 <li>• License: CC BY-SA 4.0 </li>
               </ul>
               <div className="flex flex-wrap gap-3 mt-3">
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
+                <a className="text-sm font-semibold text-yellow-700 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
+                <a className="text-sm font-semibold text-yellow-700 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
+                <a className="text-sm font-semibold text-yellow-700 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2">
               <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
             </div>
-          </div>
         </div>
       )}
     </div>
