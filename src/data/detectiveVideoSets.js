@@ -1,7 +1,7 @@
 export const detectionSets = [
   // 1) Famous Faces Speaking Out (Celebrity Speeches)
   {
-    title: "Famous Faces Speaking Out",
+    title: "Glamous Speaches",
     videos: [
       { url: "/videos/detection/Real1.mp4", label: "real" },
       { url: "/videos/detection/Fake1.mp4", label: "fake" }
@@ -10,7 +10,7 @@ export const detectionSets = [
 
   // 2) Tech Visionary Speaks (Elon Musk's Talks)
   {
-    title: "Tech Visionary Speaks",
+    title: "Tech Visions",
     videos: [
       { url: "/videos/detection/Fake2.mp4", label: "fake" },
       { url: "/videos/detection/Fake22.mp4", label: "fake" }
@@ -28,7 +28,7 @@ export const detectionSets = [
 
   // 4) Tales of Legends (Giants Stories)
   {
-    title: "Tales of Legends",
+    title: "Big & Beyond",
     videos: [
       { url: "/videos/detection/Fake4.mp4", label: "fake" },
       { url: "/videos/detection/Fake44.mp4", label: "fake" }
@@ -55,7 +55,7 @@ export const detectionSets = [
 
   // 7) Acts of Kindness (Charity)
   {
-    title: "Acts of Kindness",
+    title: "Charity Champions",
     videos: [
       { url: "/videos/detection/Real7.mp4", label: "real" },
       { url: "/videos/detection/Fake7.mp4", label: "fake" }
