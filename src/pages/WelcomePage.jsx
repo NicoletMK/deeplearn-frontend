@@ -211,9 +211,8 @@ export default function WelcomePage({ onStart, onExit }) {
                 <li>• License: CC BY-SA 4.0 </li>
               </ul>
               <div className="flex flex-wrap gap-3 mt-3">
-                <a className="text-sm font-semibold text-yellow-300 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
-                <a className="text-sm font-semibold text-yellow-300 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
-                <a className="text-sm font-semibold text-yellow-300 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
+                <a className="text-sm text-yellow-500 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
+                <a className="text-sm text-yellow-500 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2">
