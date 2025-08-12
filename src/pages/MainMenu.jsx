@@ -115,34 +115,28 @@ export default function MainMenu({ onExit, onShowIntro }) {
       {/* About Modal */}
       {showAbout && (
         <div className="fixed inset-0 z-30 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="about-title">
-          <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" />
+          <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" type="button" />
           <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-blue-100 p-6 mx-4">
-            <h2 id="about-title" className="text-2xl font-extrabold text-blue-900 mb-2">About DeepLearn</h2>
+            <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
+              <h2 id="about-title" className="text-lg font-bold text-blue-700">About DeepLearn </h2>
             <ul className="text-gray-800 space-y-1 mb-4">
               <li>• Watch fun videos and guess if they’re real or fake.</li>
-              <li>• Explore how AI videos are made to understand creator tricks.</li>
+              <li>• Explore how AI videos are made.</li>
               <li>• Reflect on the impact of AI on what we see online.</li>
             </ul>
-            <div className="rounded-xl bg-orange-50 border border-orange-200 p-4 mb-4">
-              <h3 className="text-lg font-bold text-orange-700">Dataset Credits (Quick)</h3>
-              <p className="text-gray-800 mt-1">
-                Using a curated, kid-safe subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
-              </p>
+            </div>  
+            <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
+              <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <ul className="text-gray-700 mt-2 space-y-1">
-                <li>• ~45h video, 56.5h audio, 1,975 images • 88 sites • 52 languages</li>
-                <li>• License: CC BY-SA 4.0 • Direct use only (no generative training)</li>
+                <li>• Using a subset of <span className="font-semibold" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Deepfake-Eval-2024</span> (Chandra et al., 2025) </li>
+                <li>• License: <span className="font-semibold" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</span> </li>
               </ul>
-              <div className="flex flex-wrap gap-3 mt-3">
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
-                <a className="text-sm font-semibold text-orange-700 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
-              </div>
             </div>
             <div className="flex items-center justify-end gap-2">
-              <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50">Close</button>
+              <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
             </div>
-          </div>
         </div>
+      </div>  
       )}
     </div>
   );
