@@ -20,12 +20,13 @@ export default function MainMenu({ onExit, onShowIntro }) {
   }, [showAbout, closeAbout]);
 
   const views = [
-    { key:'detectiveTraining', label:'Detective Training', icon:'/DetectiveIcon.png', subtitle:'Learn detection basics' },
-    { key:'deepfakeStudio',    label:'Deepfake Studio',    icon:'/CreativeIcon.png',  subtitle:'Try premade deepfakes' },
-    { key:'aiVideoLab',        label:'AI Video Lab',       icon:'/HeyGenIcon.png',   subtitle:'See HeyGen\'s avatar tech' },
-    { key:'deepfakeForensics', label:'Deepfake Forensics', icon:'/DetectiveIcon.png', subtitle:'Test your skills' },
-    { key:'ethicsHub',         label:'Ethics Hub',         icon:'/EthicalIcon.png',  subtitle:'Reflect on implications' },
+    { key:'detectiveTraining', label:'Detective Warm-Up',  icon:'/DetectiveIcon.png',  subtitle:'Spot the tell-tale signs' },
+    { key:'deepfakeStudio',    label:'Deepfake Studio',    icon:'/CreativeIcon.png',   subtitle:'Hands-on face swaps (safe set)' },
+    { key:'aiVideoLab',        label:'Avatar Lab',         icon:'/HeyGenIcon.png',     subtitle:'Build talking avatars (HeyGen)' },
+    { key:'deepfakeForensics', label:'Detective Mastery',  icon:'/DetectiveIcon.png',  subtitle:'Tackle tough, timed cases' },
+    { key:'ethicsHub',         label:'Ethics & Impact',    icon:'/EthicalIcon.png',    subtitle:'Reflect on fairness, harm & consent' },
   ];
+
 
   return (
     <div className="min-h-screen flex flex-col bg-yellow-100">
@@ -45,20 +46,6 @@ export default function MainMenu({ onExit, onShowIntro }) {
             }
             role="menu"
           >
-            <button
-              onClick={() => { setView('detectiveTraining'); setShowMenu(false); }}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
-              role="menuitem"
-            >
-              🔁 Restart Flow
-            </button>
-            <button
-              onClick={() => { onShowIntro?.(); setShowMenu(false); }}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
-              role="menuitem"
-            >
-              📘 Intro & Full Credits
-            </button>
             <button
               onClick={openAbout}
               className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
@@ -149,7 +136,6 @@ export default function MainMenu({ onExit, onShowIntro }) {
                 <a className="text-sm font-semibold text-orange-700 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
                 <a className="text-sm font-semibold text-orange-700 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
                 <a className="text-sm font-semibold text-orange-700 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
-                <button onClick={() => { closeAbout(); onShowIntro?.(); }} className="text-sm font-semibold text-blue-700 underline">Full Intro & Credits →</button>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2">
