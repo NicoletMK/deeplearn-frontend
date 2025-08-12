@@ -205,10 +205,8 @@ export default function WelcomePage({ onStart, onExit }) {
           </div>  
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
-              <p className="text-gray-800 mt-1">
-                Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
-              </p>
               <ul className="text-gray-700 mt-2 space-y-1">
+                <li>• Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
                 <li>• License: CC BY-SA 4.0 </li>
               </ul>
               <div className="flex flex-wrap gap-3 mt-3">
