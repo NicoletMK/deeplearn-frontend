@@ -195,6 +195,7 @@ export default function WelcomePage({ onStart, onExit }) {
       {showAbout && (
         <div className="fixed inset-0 z-30 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="about-title">
           <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" type="button" />
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-blue-100 p-6 mx-4">
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h2 className="text-lg font-bold text-blue-700">About DeepLearn </h2>
             <ul className="text-gray-800 space-y-1 mb-4">
@@ -202,7 +203,7 @@ export default function WelcomePage({ onStart, onExit }) {
               <li>• Explore how AI videos are made.</li>
               <li>• Reflect on the impact of AI on what we see online.</li>
             </ul>
-          </div>  
+            </div>  
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <ul className="text-gray-700 mt-2 space-y-1">
@@ -219,6 +220,7 @@ export default function WelcomePage({ onStart, onExit }) {
               <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
             </div>
         </div>
+      </div>  
       )}
     </div>
   );
