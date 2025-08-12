@@ -207,13 +207,13 @@ export default function WelcomePage({ onStart, onExit }) {
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
               <ul className="text-gray-700 mt-2 space-y-1">
-                <li>• Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025).
+                <li>• Using a subset of <span className="font-semibold">Deepfake-Eval-2024</span> (Chandra et al., 2025)
                 <li>• License: CC BY-SA 4.0 </li>
               </ul>
               <div className="flex flex-wrap gap-3 mt-3">
-                <a className="text-sm font-semibold text-yellow-700 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
-                <a className="text-sm font-semibold text-yellow-700 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
-                <a className="text-sm font-semibold text-yellow-700 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
+                <a className="text-sm font-semibold text-yellow-300 underline" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Paper (arXiv)</a>
+                <a className="text-sm font-semibold text-yellow-300 underline" href="https://doi.org/10.48550/arXiv.2503.02857" target="_blank" rel="noreferrer">DOI</a>
+                <a className="text-sm font-semibold text-yellow-300 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2">
