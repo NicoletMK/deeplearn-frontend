@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function WelcomePage({ onStart, onExit }) {
@@ -9,38 +9,15 @@ export default function WelcomePage({ onStart, onExit }) {
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
 
-
-
-  useEffect(() => {
-    const stored = localStorage.getItem('deeplearnUserId');
-    if (stored) {
-      setUserId(stored);
-    } else {
-      const newId = uuidv4();
-      localStorage.setItem('deeplearnUserId', newId);
-      setUserId(newId);
-    }
-
-    // Try resending saved failed submissions
-    const unsent = localStorage.getItem('deeplearnUnsent');
-    if (unsent && navigator.onLine) {
-      const data = JSON.parse(unsent);
-      sendToBackend(data, true);
-    }
-  }, []);
-
-  const toggleMenu = () => setShowMenu(!showMenu);
   const [showMenu, setShowMenu] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+
+  const toggleMenu = () => setShowMenu((v) => !v);
   const openAbout = () => { setShowMenu(false); setShowAbout(true); };
   const closeAbout = useCallback(() => setShowAbout(false), []);
-  useEffect(() => {
-    function onKey(e){ if(e.key==='Escape') closeAbout(); }
-    if (showAbout) document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [showAbout, closeAbout]);
-  
-  const sendToBackend = async (data, isRetry = false) => {
+
+  // Memoize so we can safely reference in effects
+  const sendToBackend = useCallback(async (data, isRetry = false) => {
     try {
       const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5050';
       const response = await fetch(`${backend}/api/welcome`, {
@@ -52,19 +29,58 @@ export default function WelcomePage({ onStart, onExit }) {
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       console.log(isRetry ? '✅ Retried submission success' : '✅ Submitted to backend');
 
-      // Clear localStorage if retry was successful
       if (isRetry) {
         localStorage.removeItem('deeplearnUnsent');
       }
     } catch (error) {
       console.error('❌ Submission failed:', error);
-
-      // Save to localStorage for retry later
       if (!isRetry) {
         localStorage.setItem('deeplearnUnsent', JSON.stringify(data));
       }
     }
-  };
+  }, []);
+
+  // On mount: ensure userId and retry unsent payloads
+  useEffect(() => {
+    const stored = localStorage.getItem('deeplearnUserId');
+    if (stored) {
+      setUserId(stored);
+    } else {
+      const newId = uuidv4();
+      localStorage.setItem('deeplearnUserId', newId);
+      setUserId(newId);
+    }
+
+    const unsent = localStorage.getItem('deeplearnUnsent');
+    if (unsent && navigator.onLine) {
+      try {
+        const data = JSON.parse(unsent);
+        sendToBackend(data, true);
+      } catch {
+        // If parse fails, clear the bad cache
+        localStorage.removeItem('deeplearnUnsent');
+      }
+    }
+  }, [sendToBackend]);
+
+  // Modal: close on Escape + lock body scroll
+  useEffect(() => {
+    if (!showAbout) return;
+
+    function onKey(e) {
+      if (e.key === 'Escape') closeAbout();
+    }
+    document.addEventListener('keydown', onKey);
+
+    const { body } = document;
+    const prevOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      body.style.overflow = prevOverflow;
+    };
+  }, [showAbout, closeAbout]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,12 +95,8 @@ export default function WelcomePage({ onStart, onExit }) {
       timestamp: new Date().toISOString(),
     };
 
-    // Navigate immediately for faster UX
-    onStart();
-
-    // Send data in background
-    sendToBackend(payload);
-
+    onStart();            // navigate immediately
+    sendToBackend(payload); // fire-and-forget
     setLoading(false);
   };
 
@@ -93,21 +105,23 @@ export default function WelcomePage({ onStart, onExit }) {
       <div className="relative w-full flex justify-between items-center bg-sky-300 p-4 rounded-t-xl">
         <h1 className="text-3xl font-bold text-blue-900">DeepLearn</h1>
         <div className="relative">
-          <button onClick={toggleMenu} className="space-y-1 focus:outline-none">
-            <div className="w-6 h-1 bg-blue-800 rounded"></div>
-            <div className="w-6 h-1 bg-blue-800 rounded"></div>
-            <div className="w-6 h-1 bg-blue-800 rounded"></div>
+          <button onClick={toggleMenu} className="space-y-1 focus:outline-none" aria-haspopup="menu" aria-expanded={showMenu}>
+            <div className="w-6 h-1 bg-blue-800 rounded" />
+            <div className="w-6 h-1 bg-blue-800 rounded" />
+            <div className="w-6 h-1 bg-blue-800 rounded" />
           </button>
           <div
             className={
               "absolute right-0 mt-2 w-40 bg-white border border-blue-300 rounded-lg shadow-lg z-10 transform transition-all duration-200 origin-top " +
               (showMenu ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none")
             }
+            role="menu"
           >
             <button
               onClick={openAbout}
               className="w-full text-left px-4 py-2 text-sm hover:bg-blue-100"
               role="menuitem"
+              type="button"
             >
               ❓ About This App
             </button>
@@ -176,10 +190,11 @@ export default function WelcomePage({ onStart, onExit }) {
           </form>
         </div>
       </div>
+
       {/* About Modal */}
       {showAbout && (
         <div className="fixed inset-0 z-30 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="about-title">
-          <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" />
+          <button className="absolute inset-0 bg-black/40" onClick={closeAbout} aria-label="Close" type="button" />
           <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-blue-100 p-6 mx-4">
             <h2 id="about-title" className="text-2xl font-extrabold text-blue-900 mb-2">About DeepLearn</h2>
             <ul className="text-gray-800 space-y-1 mb-4">
@@ -203,11 +218,11 @@ export default function WelcomePage({ onStart, onExit }) {
               </div>
             </div>
             <div className="flex items-center justify-end gap-2">
-              <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50">Close</button>
+              <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
             </div>
           </div>
         </div>
-      )}     
+      )}
     </div>
   );
 }
