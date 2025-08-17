@@ -8,34 +8,23 @@ const MAX_REASON_LEN = 120;
 const EVERYTHING_REAL = "Everything looked real — I didn’t notice any AI clues";
 
 const FEATURE_OPTIONS = [
-  EVERYTHING_REAL, 
+  EVERYTHING_REAL,                
   "Lip-sync mismatch",
-  "Mouth-voice mismatch",
-  "Blinking looks odd / too regular",
-  "Face edges / boundary artifacts",
-  "Skin texture too smooth / waxy",
-  "Lighting or shadows inconsistent",
-  "Reflections don’t match (glasses/eyes)",
-  "Hands / fingers look strange",
-  "Motion is jittery or too smooth",
-  "Audio sounds robotic / unnatural",
-  "Background warps or shimmers",
-  "Background looks unrealistic",
-  "Compression artifacts pop in/out",
+  "Odd or too regular blinking",
+  "Face boundaries / edges look wrong",
+  "Skin too smooth or waxy",
+  "Lighting/shadows inconsistent",
+  "Reflections don’t match",
+  "Hands or fingers look strange",
+  "Motion jittery or too smooth",
+  "Audio sounds robotic or unnatural",
+  "Background unrealistic or warping",
   "Temporal inconsistencies across frames",
-  "Context seems unlikely / too perfect",
-
+  "Scenario or context seems impossible",
   "Historically or contextually unreasonable",
-  "Emotions or expressions feel unnatural",
-  "Speech patterns or accent mismatched",
-  "Actions defy gravity or physics subtly",
-  "Objects appear or disappear suddenly",
-  "Lighting or shadow inconsistent with environment",
-  "Clothing or hairstyle changes unexpectedly",
-  "Text / signs in the scene are distorted",
-  "Unnatural camera angles or perspectives",
-  "Scene composition looks too staged or perfect"
+  "Expressions or emotions feel unnatural"
 ];
+
 
 
 const EMOJIS = ["🎭", "🕶️", "😂", "💰", "📰", "🎤", "🧪", "🎬", "🧍", "🧠"];
