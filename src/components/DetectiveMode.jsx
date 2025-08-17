@@ -182,24 +182,115 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
       <div className="bg-yellow-50 border-4 border-blue-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
+        {/* Header + progress */}
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-1xl md:text-2xl font-extrabold text-blue-600">
-            {session === "pre" ? "Warm-Up Detective" : "Master Detective"}
-          </h1>
+          <div className="flex justify-center">
+            <h1 className="text-1xl md:text-2xl font-extrabold text-blue-600">
+              {sessionTitle}
+            </h1>
+          </div>
           <div className="text-sm font-semibold text-blue-700">
             {Math.min(currentIndex + (submitted ? 1 : 0), total)}/{total} done
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-4">
+        <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-2">
           <div className="h-3 bg-blue-500" style={{ width: `${progressPct}%` }} />
         </div>
 
-        {/* Single video per screen */}
-        <div className="mb-6 flex flex-col items-center">
-          <MediaPlayer src={currentVideo.url} />
+        {/* Emoji step dots (done/current/locked) */}
+        <div className="flex justify-center gap-3 mb-4">
+          {videoPairs.map((_, i) => {
+            const isDone = i < currentIndex || (i === currentIndex && submitted);
+            const isCurrent = i === currentIndex && !submitted;
+            const emoji = EMOJIS[i] || "🧩";
+            return (
+              <div key={i} className="relative">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center text-xl shadow
+                    ${isDone ? "bg-green-500 text-white" : isCurrent ? "bg-orange-500 text-white" : "bg-blue-200 text-blue-900"}`}
+                  title={`Case ${i + 1}`}
+                >
+                  {emoji}
+                </div>
+                {isDone && (
+                  <div className="absolute -top-2 -right-2">✅</div>
+                )}
+              </div>
+            );
+          })}
         </div>
+
+        {/* Centered, easy-to-read instructions with emojis */}
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              🎥👀 Watch both clips carefully.
+            </p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              ☑️🤖 Check the clip(s) you believe are AI-generated. 
+            </p>
+             <p className="text-base md:text-lg leading-relaxed mb-3">
+              🌟🙅Leave both unchecked if you think both are real.
+            </p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              🔍💡 Pick at least one clue that looks AI-generated, or click "Everything looked real" if no AI clues noticed.
+            </p>
+            <p className="text-base md:text-lg leading-relaxed">
+              ✏️🗒️ Write a brief reason. Then submit to unlock the next case!
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 mb-4">
+          <div className="text-sm md:text-base text-gray-700">
+            Case <span className="font-semibold">{currentIndex + 1}</span> of{" "}
+            <span className="font-semibold">{total}</span>
+          </div>
+          <div className="text-xl md:text-2xl font-semibold text-gray-900 mt-1">
+            {groupTitle}
+          </div>
+          {groupSubtitle && (
+            <div className="text-sm md:text-base text-gray-600">{groupSubtitle}</div>
+          )}
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.35 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 mb-6"
+          >
+            {randomizedIndices.map((pairIdxInPair, idxInView) => {
+              const media = currentPair.videos[pairIdxInPair];
+              const selected = selectedIndices.includes(idxInView);
+              return (
+                <div key={idxInView} className="flex flex-col items-center">
+                  <MediaPlayer
+                    src={media.url}
+                    onPlay={() => {/* add analytics if desired */}}
+                    onPause={() => {/* add analytics if desired */}}
+                    onSeek={() => {/* add analytics if desired */}}
+                  />
+                  <label className="mt-3 flex items-center gap-2 text-sm md:text-base">
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5"
+                      checked={selected}
+                      onChange={() => toggleClip(idxInView)}
+                      disabled={submitted}
+                    />
+                    Mark {idxInView === 0 ? "Clip A (Left)" : "Clip B (Right)"} as AI-generated
+                  </label>
+                </div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Answer Board */}
         <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto">
@@ -207,11 +298,13 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
             What clues did you notice?
           </h2>
 
+          {/* Clue chips - centered and clean */}
           <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-2 max-w-3xl mb-4">
+            <div className="flex flex-wrap justify-center gap-2 max-w-3xl">
               {FEATURE_OPTIONS.map((opt, idx) => {
                 const checked = featureSet.includes(opt);
                 const isEverything = opt === EVERYTHING_REAL;
+                // If EVERYTHING_REAL is selected, other chips are disabled; if any other is selected, EVERYTHING_REAL is disabled
                 const disableThis =
                   (featureSet.includes(EVERYTHING_REAL) && !isEverything) ||
                   (isEverything && featureSet.some((o) => o !== EVERYTHING_REAL));
@@ -221,66 +314,96 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
                     label={opt}
                     checked={checked}
                     onToggle={() => toggleClue(opt)}
-                    emphasis={idx === 0}
+                    emphasis={idx === 0} // highlight the "Everything looked real" option
                     disabled={disableThis || submitted}
                   />
                 );
               })}
             </div>
 
-            <input
-              type="text"
-              value={otherFeature}
-              onChange={(e) => setOtherFeature(e.target.value)}
-              placeholder="Other clue you noticed (optional)"
-              className="w-full border rounded-lg p-2 mb-4"
-              disabled={featureSet.includes(EVERYTHING_REAL) || submitted}
-            />
-
-            <textarea
-              value={reasoning}
-              onChange={(e) => setReasoning(e.target.value)}
-              rows={3}
-              maxLength={MAX_REASON_LEN}
-              placeholder={`Required: write a short reason (≥ ${MIN_REASON_LEN} characters).`}
-              className="mt-2 w-full border rounded-lg p-3 mb-2"
-              disabled={submitted}
-            />
-            <div className="mt-1 text-xs">
-              <span className={reasonOk ? "text-green-700" : "text-red-600"}>
-                {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} needed)`}
-              </span>
+            {/* Optional free-text & reason */}
+            <div className="mt-4 w-full max-w-3xl">
+              <input
+                type="text"
+                value={otherFeature}
+                onChange={(e) => setOtherFeature(e.target.value)}
+                placeholder="Other clue you noticed (optional)"
+                className="w-full border rounded-lg p-2"
+                disabled={featureSet.includes(EVERYTHING_REAL) || submitted}
+              />
             </div>
 
-            <div className="mt-4 w-full flex items-center gap-3">
-              <input
-                type="range"
-                min={1}
-                max={5}
-                value={confidence}
-                onChange={(e) => setConfidence(parseInt(e.target.value))}
-                className="w-full"
+            <div className="mt-4 w-full max-w-3xl">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-gray-900">
+                  Explain your reasoning in 1–3 sentences
+                  <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} required)</span>
+                </div>
+              </div>
+              <textarea
+                value={reasoning}
+                onChange={(e) => setReasoning(e.target.value)}
+                rows={3}
+                maxLength={MAX_REASON_LEN}
+                placeholder={`Required: write a short reason (≥ ${MIN_REASON_LEN} characters).`}
+                className="mt-2 w-full border rounded-lg p-3"
                 disabled={submitted}
               />
-              <div className="w-10 text-center font-semibold">{confidence}</div>
+              <div className="mt-1 text-xs">
+                <span className={reasonOk ? "text-green-700" : "text-red-600"}>
+                  {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} needed)`}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 w-full max-w-3xl">
+              <div className="font-semibold text-gray-900 mb-2">
+                How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  value={confidence}
+                  onChange={(e) => setConfidence(parseInt(e.target.value))}
+                  className="w-full"
+                  disabled={submitted}
+                />
+                <div className="w-10 text-center font-semibold">{confidence}</div>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Submit / Next */}
         <div className="mt-4 flex flex-col items-center gap-3">
           {!submitted && (
-            <button
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className={`px-8 py-3 text-white text-lg font-bold rounded-full
-                ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
-            >
-              Submit Answer
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className={`px-8 py-3 text-white text-lg font-bold rounded-full
+                  ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+              >
+                Submit Answer
+              </button>
+
+              {!canSubmit && (
+                <div className="text-sm text-gray-700 text-center max-w-xl">
+                  To submit, please:
+                  <ul className="list-disc list-inside text-left">
+                    {!hasRequiredClue && <li>Choose at least <strong>one</strong> clue above.</li>}
+                    {!reasonOk && <li>Write a brief reason (≥ {MIN_REASON_LEN} characters).</li>}
+                  </ul>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
 
+      {/* Badge modal after submit (encouragement + correctness if post) */}
       {showBadge && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl border-4 border-yellow-200 p-8 max-w-md w-full text-center">
