@@ -3,6 +3,7 @@ import CreatorMode from '../components/CreatorMode';
 import DetectiveMode from '../components/DetectiveMode';
 import EthicsReflection from '../components/EthicsReflection';
 import HeyGenDemo from '../components/CreatorHeyGen';
+import { detectivePreSets, detectivePostSets } from "../data/detectiveVideoSets";
 
 export default function MainMenu({ onExit, onShowIntro }) {
   const [view, setView] = useState('detectiveTraining');
@@ -25,6 +26,7 @@ export default function MainMenu({ onExit, onShowIntro }) {
     { key:'deepfakeForensics', label:'Detective Mastery',  icon:'/DetectiveIcon.png',  subtitle:'Tackle tough, timed cases' },
     { key:'ethicsHub',         label:'Ethics & Impact',    icon:'/EthicalIcon.png',    subtitle:'Reflect on fairness, harm & consent' },
   ];
+
 
   return (
     <div className="min-h-screen flex flex-col bg-yellow-100">
@@ -88,6 +90,7 @@ export default function MainMenu({ onExit, onShowIntro }) {
         <div className="flex-1 p-6 flex flex-col items-center justify-center">
           {view === 'detectiveTraining' && (
             <DetectiveMode
+              videoPairs={detectivePreSets}
               session="pre"
               onComplete={() => setView('deepfakeStudio')}
             />
@@ -100,6 +103,7 @@ export default function MainMenu({ onExit, onShowIntro }) {
           )}
           {view === 'deepfakeForensics' && (
             <DetectiveMode
+              videoPairs={detectivePostSets}
               session="post"
               onComplete={() => setView('ethicsHub')}
             />
