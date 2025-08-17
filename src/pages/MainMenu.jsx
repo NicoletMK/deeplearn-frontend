@@ -127,10 +127,31 @@ export default function MainMenu({ onExit, onShowIntro }) {
             </div>  
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 mb-4">
               <h3 className="text-lg font-bold text-blue-700">Dataset Credits </h3>
-              <ul className="text-gray-700 mt-2 space-y-1">
-                <li>• Using a subset of <span className="font-semibold" href="https://arxiv.org/abs/2503.02857" target="_blank" rel="noreferrer">Deepfake-Eval-2024</span> (Chandra et al., 2025) </li>
-                <li>• License: <span className="font-semibold" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</span> </li>
-              </ul>
+<ul className="text-gray-700 mt-2 space-y-1">
+  <li>
+    • Using a subset of{" "}
+    <a
+      className="font-semibold underline"
+      href="https://arxiv.org/abs/2503.02857"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Deepfake-Eval-2024
+    </a>{" "}
+    (Chandra et al., 2025)
+  </li>
+  <li>
+    • License:{" "}
+    <a
+      className="font-semibold underline"
+      href="https://creativecommons.org/licenses/by-sa/4.0/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      CC BY-SA 4.0
+    </a>
+  </li>
+</ul>
             </div>
             <div className="flex items-center justify-end gap-2">
               <button onClick={closeAbout} className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" type="button">Close</button>
