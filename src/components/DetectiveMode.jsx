@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MIN_REASON_LEN = 10;
-const MAX_REASON_LEN = 120;
 
 const videos = [
   { url: "/videos/Fake1.mp4", label: "fake" },
@@ -18,7 +17,6 @@ const videos = [
   { url: "/videos/Fake99.mp4", label: "fake" },
 ];
 
-// Knowledge-based & contextual clues
 const FEATURE_OPTIONS = [
   "Lip-sync mismatch",
   "Mouth not matching voice",
@@ -41,9 +39,8 @@ const FEATURE_OPTIONS = [
 ];
 
 const EVERYTHING_REAL = FEATURE_OPTIONS[FEATURE_OPTIONS.length - 1];
-const EMOJIS = ["🎭", "🕶️", "😂", "💰", "📰", "🎤", "🧪", "🎬", "🧍", "🧠"];
 
-// MediaPlayer and Chip components remain unchanged
+// Components
 function MediaPlayer({ src }) {
   return (
     <video controls className="w-full rounded shadow-xl max-w-xl">
@@ -53,7 +50,7 @@ function MediaPlayer({ src }) {
   );
 }
 
-function Chip({ checked, label, onToggle, emphasis = false, disabled = false }) {
+function Chip({ checked, label, onToggle, disabled = false }) {
   return (
     <button
       type="button"
@@ -64,8 +61,6 @@ function Chip({ checked, label, onToggle, emphasis = false, disabled = false }) 
         ${
           checked
             ? "bg-blue-600 text-white border-blue-600"
-            : emphasis
-            ? "bg-yellow-100 border-yellow-400 hover:bg-yellow-200"
             : "bg-white text-gray-800 border-gray-300 hover:bg-blue-50"
         }`}
     >
@@ -80,11 +75,11 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [featureSet, setFeatureSet] = useState([]);
-  const [otherFeature, setOtherFeature] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [confidence, setConfidence] = useState(3);
   const [showBadge, setShowBadge] = useState(false);
 
+  // Assign user ID
   useEffect(() => {
     const stored = localStorage.getItem("deeplearnUserId");
     if (stored) setUserId(stored);
@@ -95,35 +90,34 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
     }
   }, []);
 
+  // Reset form when video changes
   useEffect(() => {
     setFeatureSet([]);
-    setOtherFeature("");
     setReasoning("");
-    setConfidence(3);
     setSubmitted(false);
     setIsCorrect(null);
   }, [currentIndex]);
 
-  const total = videos.length;
   const currentVideo = videos[currentIndex];
+  const total = videos.length;
 
   const toggleClue = (label) => {
     setFeatureSet((prev) => {
       const has = prev.includes(label);
       if (label === EVERYTHING_REAL) return has ? [] : [EVERYTHING_REAL];
-      const next = has ? prev.filter((l) => l !== label) : [...prev.filter((l) => l !== EVERYTHING_REAL), label];
-      return next;
+      return has
+        ? prev.filter((l) => l !== label)
+        : [...prev.filter((l) => l !== EVERYTHING_REAL), label];
     });
   };
 
-  const reasonLen = reasoning.trim().length;
+  const reasonOk = reasoning.trim().length >= MIN_REASON_LEN;
   const hasRequiredClue = featureSet.length > 0;
-  const reasonOk = reasonLen >= MIN_REASON_LEN;
-  const canSubmit = hasRequiredClue && reasonOk;
+  const canSubmit = !submitted && hasRequiredClue && reasonOk;
 
   const getBadge = () => {
     const titles = ["Great Start, Detective!", "Clue Finder!", "Sharp Eyes!", "Final Case Solved!"];
-    const emojis  = ["🕵️‍♀️", "🔍", "⚡", "🏆"];
+    const emojis = ["🕵️‍♀️", "🔍", "⚡", "🏆"];
     const idx = Math.min(currentIndex, titles.length - 1);
     const title = titles[idx];
     const emoji = emojis[idx];
@@ -139,11 +133,12 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   };
 
   const handleSubmit = async () => {
-    if (!canSubmit || submitted) return;
+    if (!canSubmit) return;
 
     const correct = currentVideo.label === "fake";
     setIsCorrect(correct);
     setSubmitted(true);
+    setShowBadge(true);
 
     const payload = {
       userId,
@@ -152,7 +147,6 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
       video: currentVideo.url,
       label: currentVideo.label,
       cluesChosen: featureSet,
-      otherFeature: otherFeature.trim() || null,
       reasoning: reasoning.trim(),
       confidence,
       correct
@@ -168,8 +162,6 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
     } catch (err) {
       console.error("❌ Submission failed:", err);
     }
-
-    setShowBadge(true);
   };
 
   const handleNext = () => {
@@ -181,8 +173,73 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const progressPct = Math.round(((currentIndex + (submitted ? 1 : 0)) / total) * 100);
 
   return (
-    <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
-      {/* ...rest of your existing JSX remains unchanged */}
+    <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4 gap-6">
+      {/* Progress */}
+      <div className="w-full max-w-xl mb-4">
+        <div className="bg-gray-300 h-2 rounded-full overflow-hidden">
+          <div className="bg-blue-600 h-2" style={{ width: `${progressPct}%` }}></div>
+        </div>
+        <p className="text-sm mt-1 text-gray-700">
+          Case {currentIndex + 1} of {total}
+        </p>
+      </div>
+
+      {/* Video */}
+      <MediaPlayer src={currentVideo.url} />
+
+      {/* Clues */}
+      <div className="flex flex-wrap gap-2 justify-center max-w-xl mt-4">
+        {FEATURE_OPTIONS.map((label) => (
+          <Chip
+            key={label}
+            label={label}
+            checked={featureSet.includes(label)}
+            onToggle={() => toggleClue(label)}
+          />
+        ))}
+      </div>
+
+      {/* Reasoning */}
+      <textarea
+        className="mt-4 p-2 border rounded w-full max-w-xl"
+        rows={3}
+        placeholder="Explain your reasoning..."
+        value={reasoning}
+        onChange={(e) => setReasoning(e.target.value)}
+      />
+
+      {/* Submit / Next */}
+      {!submitted ? (
+        <button
+          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+        >
+          Submit
+        </button>
+      ) : (
+        <button
+          className="mt-4 px-6 py-2 bg-green-600 text-white rounded"
+          onClick={handleNext}
+        >
+          Next Case
+        </button>
+      )}
+
+      {/* Badge */}
+      <AnimatePresence>
+        {showBadge && (
+          <motion.div
+            className="mt-4 p-4 bg-yellow-200 rounded shadow-md max-w-xl text-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <strong>{getBadge().emoji} {getBadge().title}</strong>
+            <p>{getBadge().desc}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
