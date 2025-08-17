@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const MIN_REASON_LEN = 10;
 const MAX_REASON_LEN = 120;
 
-// Internal videos array — no need for external dataset anymore
 const videos = [
   { url: "/videos/Fake1.mp4", label: "fake" },
   { url: "/videos/Fake3.mp4", label: "fake" },
