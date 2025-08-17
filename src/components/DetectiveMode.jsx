@@ -105,7 +105,12 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
 
   const total = videos.length;
   const currentVideo = videos[currentIndex];
-
+  const toggleClip = (idxInView) => {
+    if (submitted) return;
+    setSelectedIndices((prev) =>
+      prev.includes(idxInView) ? prev.filter((i) => i !== idxInView) : [...prev, idxInView]
+    );
+  };
   const toggleClue = (label) => {
     setFeatureSet((prev) => {
       const has = prev.includes(label);
