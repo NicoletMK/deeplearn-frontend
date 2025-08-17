@@ -176,7 +176,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
     if (currentIndex + 1 < total) setCurrentIndex(currentIndex + 1);
     else if (onComplete) onComplete();
   };
-
+  const sessionTitle = session === "pre" ? "Warm-Up Detective" : "Master Detective";
   const progressPct = Math.round(((currentIndex + (submitted ? 1 : 0)) / total) * 100);
 
   return (
@@ -241,19 +241,6 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
               ✏️🗒️ Write a brief reason. Then submit to unlock the next case!
             </p>
           </div>
-        </div>
-
-        <div className="mt-4 mb-4">
-          <div className="text-sm md:text-base text-gray-700">
-            Case <span className="font-semibold">{currentIndex + 1}</span> of{" "}
-            <span className="font-semibold">{total}</span>
-          </div>
-          <div className="text-xl md:text-2xl font-semibold text-gray-900 mt-1">
-            {groupTitle}
-          </div>
-          {groupSubtitle && (
-            <div className="text-sm md:text-base text-gray-600">{groupSubtitle}</div>
-          )}
         </div>
 
         <AnimatePresence mode="wait">
