@@ -222,10 +222,9 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
         {/* Instructions */}
         <div className="max-w-3xl mx-auto mb-6">
           <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch both clips carefully.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">☑️🤖 Check the clip(s) you believe are AI-generated.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">🌟🙅 Leave both unchecked if you think both are real.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">🔍💡 Pick at least one clue that looks AI-generated, or click "Everything looked real".</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip carefully and decide if it's real.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">☑️🤖 Click "Everything looked real" if no AI clues.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🔍💡 Check all the apliable clues if you belieeve it's AI-generated.</p>
             <p className="text-base md:text-lg leading-relaxed">✏️🗒️ Write a brief reason. Then submit to unlock the next case!</p>
           </div>
         </div>
