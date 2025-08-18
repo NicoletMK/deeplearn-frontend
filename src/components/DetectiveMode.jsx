@@ -105,12 +105,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
 
   const total = videos.length;
   const currentVideo = videos[currentIndex];
-  const toggleClip = (idxInView) => {
-    if (submitted) return;
-    setSelectedIndices((prev) =>
-      prev.includes(idxInView) ? prev.filter((i) => i !== idxInView) : [...prev, idxInView]
-    );
-  };
+
   const toggleClue = (label) => {
     setFeatureSet((prev) => {
       const has = prev.includes(label);
@@ -248,41 +243,43 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
           </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.35 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 mb-6"
-          >
-            {randomizedIndices.map((pairIdxInPair, idxInView) => {
-              const media = currentPair.videos[pairIdxInPair];
-              const selected = selectedIndices.includes(idxInView);
-              return (
-                <div key={idxInView} className="flex flex-col items-center">
-                  <MediaPlayer
-                    src={media.url}
-                    onPlay={() => {/* add analytics if desired */}}
-                    onPause={() => {/* add analytics if desired */}}
-                    onSeek={() => {/* add analytics if desired */}}
-                  />
-                  <label className="mt-3 flex items-center gap-2 text-sm md:text-base">
-                    <input
-                      type="checkbox"
-                      className="w-5 h-5"
-                      checked={selected}
-                      onChange={() => toggleClip(idxInView)}
-                      disabled={submitted}
-                    />
-                    Mark {idxInView === 0 ? "Clip A (Left)" : "Clip B (Right)"} as AI-generated
-                  </label>
-                </div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
+<AnimatePresence mode="wait">
+  <motion.div
+    key={currentIndex}
+    initial={{ opacity: 0, x: 100 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -100 }}
+    transition={{ duration: 0.35 }}
+    className="flex flex-col items-center mb-6"
+  >
+    <MediaPlayer
+      src={currentVideo.url}
+      onPlay={() => {/* optional analytics */}}
+      onPause={() => {/* optional analytics */}}
+      onSeek={() => {/* optional analytics */}}
+    />
+
+    {/* Instead of choosing between two, keep a single toggle */}
+    <label className="mt-3 flex items-center gap-2 text-sm md:text-base">
+      <input
+        type="checkbox"
+        className="w-5 h-5"
+        checked={featureSet.includes("Marked as AI")}
+        onChange={() => {
+          if (submitted) return;
+          setFeatureSet((prev) =>
+            prev.includes("Marked as AI")
+              ? prev.filter((l) => l !== "Marked as AI")
+              : [...prev, "Marked as AI"]
+          );
+        }}
+        disabled={submitted}
+      />
+      Mark this video as AI-generated
+    </label>
+  </motion.div>
+</AnimatePresence>
+
 
         {/* Answer Board */}
         <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto">
