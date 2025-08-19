@@ -148,6 +148,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
       userId,
       session,
       timestamp: new Date().toISOString(),
+      videoIndex: currentIndex,
       video: currentVideo.url,
       label: currentVideo.label,
       userLabel: videoChoice,
