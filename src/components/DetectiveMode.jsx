@@ -358,9 +358,10 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
                 <div className="text-sm text-gray-700 text-center max-w-xl">
                   To submit, please:
                   <ul className="list-disc list-inside text-left">
+                    {!videoChoice && <li>Select if the video is Real or AI.</li>}
                     {!hasRequiredClue && <li>Choose at least <strong>one</strong> clue above.</li>}
                     {!reasonOk && <li>Write a brief reason (≥ {MIN_REASON_LEN} characters).</li>}
-                    {!videoChoice && <li>Select if the video is Real or AI.</li>}
+                    {!confidence && <li>Set your confidence level (1–5).</li>}
                   </ul>
                 </div>
               )}
