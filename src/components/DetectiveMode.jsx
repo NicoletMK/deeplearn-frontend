@@ -137,41 +137,41 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
     return { title, emoji, desc };
   };
 
-  const handleSubmit = async () => {
-    if (!canSubmit || submitted) return;
+const handleSubmit = async () => {
+  if (!canSubmit || submitted) return;
 
-    const correct = currentVideo.label === "fake";
-    setIsCorrect(correct);
-    setSubmitted(true);
+  const correct = currentVideo.label === "fake";
+  setIsCorrect(correct);
+  setSubmitted(true);
 
-    const payload = {
-      userId,
-      session,
-      timestamp: new Date().toISOString(),
-      videoIndex: currentIndex,
-      video: currentVideo.url,
-      label: currentVideo.label,
-      userLabel: videoChoice,
-      cluesChosen: featureSet,
-      otherFeature: otherFeature.trim() || null,
-      reasoning: reasoning.trim(),
-      confidence,
-      correct
-    };
-
-    try {
-      const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
-      await fetch(`${backend}/api/detective`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    } catch (err) {
-      console.error("❌ Submission failed:", err);
-    }
-
-    setShowBadge(true);
+  const payload = {
+    userId,
+    session,
+    timestamp: new Date().toISOString(),
+    videoIndex: currentIndex,          // ✅ send the index
+    video: currentVideo.url,           // video URL
+    label: currentVideo.label,         // actual label
+    userLabel: videoChoice,            // user selection
+    cluesChosen: featureSet,
+    otherFeature: otherFeature.trim() || null,
+    reasoning: reasoning.trim(),
+    confidence,                        // slider value
+    correct
   };
+
+  try {
+    const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
+    await fetch(`${backend}/api/detective`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error("❌ Submission failed:", err);
+  }
+
+  setShowBadge(true);
+};
 
   const handleNext = () => {
     setShowBadge(false);
