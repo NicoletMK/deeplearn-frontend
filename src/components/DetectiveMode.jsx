@@ -221,10 +221,10 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
         {/* Instructions */}
         <div className="max-w-3xl mx-auto mb-6">
           <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip carefully and decide if it's real.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">☑️🤖 Click "Everything looked real" if no AI clues.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">🔍💡 Check all the apliable clues if you belieeve it's AI-generated.</p>
-            <p className="text-base md:text-lg leading-relaxed">✏️🗒️ Write a brief reason. Then submit to unlock the next case!</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip carefully and decide if it's real or AI.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">☑️🤖 Click "Everything looked real" if it looks real.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🔍💡 Check all the apliable clues if you believe it's AI-generated.</p>
+            <p className="text-base md:text-lg leading-relaxed">✏️🗒️ Write a brief reason. And choose your confidence level of your answer.</p>
           </div>
         </div>
         
@@ -262,7 +262,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
 
         {/* Clues Board */}
         <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-orange-700 mb-3 text-center">What clues did you notice?</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-orange-400 mb-3 text-center">What clues did you notice?</h2>
           <div className="flex flex-col items-center">
             <div className="flex flex-wrap justify-center gap-2 max-w-3xl mb-4">
               {FEATURE_OPTIONS.map((opt, idx) => {
