@@ -74,7 +74,7 @@ export default function CreatorMode() {
 <div className="mx-auto max-w-lg bg-yellow-180 border-2 border-yellow-200 rounded-xl p-6 mb-6 text-left text-md shadow-md">
   Step 1: Click a face from the Human or Fantasy options. <br />
   Step 2: Wait until the face-swapped video appears. <br />
-  Step 3: Press "▶ Play Both Videos" and compare them!
+  Step 3: Play Both Videos and compare them 🔍
 </div>
 
 

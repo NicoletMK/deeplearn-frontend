@@ -74,12 +74,12 @@ export default function CreatorMode({ onComplete }) {
         Step 1: Pick a character.<br />
         Step 2: Pick a sentence.<br />
         Step 3: Click the button to create.<br />
-        Step 4: Wait and watch the AI-made avatar!
+        Step 4: Wait and watch the avatar 🧑🏻‍🤝‍🧑🏼
       </div>
 
       <div className="flex flex-col md:flex-row gap-12 items-center">
         {/* Character selection */}
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-6 min-h-[100px]">
           <h2 className="text-xl font-semibold text-blue-900">Choose a character</h2>
           <div className="flex gap-4">
             {characters.map((char) => (
@@ -98,7 +98,7 @@ export default function CreatorMode({ onComplete }) {
         </div>
 
         {/* Sentence selection */}
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-6 min-h-[100px]">
           <h2 className="text-xl font-semibold text-blue-900">Choose a sentence</h2>
           <div className="flex flex-col gap-3">
             {phrases.map((text, index) => (
@@ -129,7 +129,6 @@ export default function CreatorMode({ onComplete }) {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-8 max-h-[90vh] w-full max-w-2xl overflow-y-auto text-center">
-            <h3 className="text-2xl font-bold text-blue-900 mb-4">🎬 Here’s your AI avatar!</h3>
 
             {/* Loading state with progress bar */}
             {loading && (
@@ -146,6 +145,7 @@ export default function CreatorMode({ onComplete }) {
 
             {/* Video */}
             {!loading && generatedVideo && (
+              <h3 className="text-2xl font-bold text-blue-900 mb-4">🎬 Here’s your AI avatar!</h3>
               <video
                 controls
                 autoPlay
