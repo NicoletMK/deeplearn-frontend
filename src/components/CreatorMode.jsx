@@ -70,12 +70,13 @@ export default function CreatorMode() {
         🎬Create Your DeepFake Video by Face Swapping🎭
       </h1>
 
-      {/* Kid-friendly instructions under title */}
-      <div className="mx-auto max-w-md bg-yellow-200 border-2 border-yellow-400 rounded-xl p-4 mb-6 text-center text-sm shadow-md">
-        🎭 Step 1: Pick a face from the Human or Fantasy options. <br />
-        ⏳ Step 2: Wait until the face-swapped video appears. <br />
-        🔍 Step 3: Press "▶ Play Both Videos" and compare them! 
-      </div>
+
+<div className="mx-auto max-w-md bg-yellow-100 border-2 border-yellow-200 rounded-xl p-6 mb-6 text-left text-lg shadow-md">
+  🎭 Step 1: Pick a face from the Human or Fantasy options. <br />
+  ⏳ Step 2: Wait until the face-swapped video appears. <br />
+  🔍 Step 3: Press "▶ Play Both Videos" and compare them!
+</div>
+
 
       {/* Main content */}
       <div className="flex flex-col md:flex-row gap-6 mt-6">
@@ -130,7 +131,7 @@ export default function CreatorMode() {
               </button>
   
               <div className="mt-2 bg-white rounded-xl border-2 border-yellow-400 p-3 shadow-md max-w-md mx-auto animate-pulse">
-                 👀 Press "▶ Play Both Videos" and compare REAL VS AI! 🔍
+                ▶ Play Both Videos and Compare REAL VS AI🔍
               </div>
             </>
           )}
@@ -138,7 +139,7 @@ export default function CreatorMode() {
 
         {/* Nonhuman options */}
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-center mb-4">🗿Fantasy Faces🐼</h2>
+          <h2 className="text-xl font-semibold text-center mb-4">🗿Fantasy Faces</h2>
           <div className="flex flex-col gap-3">
             {nonhumanOptions.map((face, idx) => (
               <button
