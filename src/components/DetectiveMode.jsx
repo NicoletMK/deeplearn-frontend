@@ -4,10 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const MIN_REASON_LEN = 10;
 const MAX_REASON_LEN = 120;
-const EVERYTHING_REAL = "Everything looked real — I didn’t notice any AI clues";
+const EVERYTHING_REAL = "Everything looked real — no AI clues in this video";
 
 const FEATURE_OPTIONS = [
-  EVERYTHING_REAL,
   "Lip-sync mismatch",
   "Odd or too regular blinking",
   "Face boundaries / edges look wrong",
@@ -48,22 +47,36 @@ function MediaPlayer({ src }) {
   );
 }
 
-function Chip({ checked, label, onToggle, emphasis = false, disabled = false }) {
+function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabled }) {
+  const activeCls = active
+    ? `${color}-600 text-white border-${color}-700`
+    : `bg-white text-${color}-700 border-${color}-400 hover:bg-${color}-50`;
+  return (
+    <motion.button
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-6 md:px-8 py-4 md:py-5 rounded-2xl border-4 text-lg md:text-xl font-extrabold shadow-md flex items-center gap-3 transition ${activeCls} disabled:opacity-60`}
+    >
+      <span className="text-2xl md:text-3xl">{icon}</span>
+      <div className="text-left leading-tight">
+        <div>{label}</div>
+        {sublabel && <div className="text-xs md:text-sm opacity-90 font-medium">{sublabel}</div>}
+      </div>
+    </motion.button>
+  );
+}
+
+function Chip({ checked, label, onToggle, disabled = false }) {
   return (
     <motion.button
       type="button"
       onClick={onToggle}
       disabled={disabled}
-      whileTap={{ scale: 0.9 }}
-      className={`px-3 py-2 rounded-full border transition text-sm md:text-base
-        ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-        ${
-          checked
-            ? "bg-blue-600 text-white border-blue-600"
-            : emphasis
-            ? "bg-yellow-100 border-yellow-400 hover:bg-yellow-200"
-            : "bg-white text-gray-800 border-gray-300 hover:bg-blue-50"
-        }`}
+      whileTap={{ scale: 0.95 }}
+      className={`px-3 py-2 rounded-full border transition text-sm md:text-base shadow-sm
+        ${disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-50"}
+        ${checked ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}`}
     >
       {label}
     </motion.button>
@@ -80,7 +93,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const [otherFeature, setOtherFeature] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [confidence, setConfidence] = useState(3);
-  const [videoChoice, setVideoChoice] = useState(""); // real/fake selection
+  const [videoChoice, setVideoChoice] = useState(""); // 'real' | 'fake'
   const [showBadge, setShowBadge] = useState(false);
 
   useEffect(() => {
@@ -107,18 +120,39 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const total = videos.length;
   const currentVideo = videos[currentIndex];
 
+  const handleVideoChoice = (choice) => {
+    setVideoChoice(choice);
+    if (choice === "real") {
+      // Auto-select the single REAL option and lock clues
+      setFeatureSet([EVERYTHING_REAL]);
+      setOtherFeature("");
+    } else if (choice === "fake") {
+      // Remove REAL option and let them pick clues
+      setFeatureSet((prev) => prev.filter((f) => f !== EVERYTHING_REAL));
+    }
+  };
+
   const toggleClue = (label) => {
+    // Only applicable when AI is chosen
+    if (videoChoice !== "fake") return;
     setFeatureSet((prev) => {
-      if (label === EVERYTHING_REAL) return prev.includes(EVERYTHING_REAL) ? [] : [EVERYTHING_REAL];
-      const newSet = prev.filter((l) => l !== EVERYTHING_REAL);
-      return prev.includes(label) ? newSet.filter((l) => l !== label) : [...newSet, label];
+      return prev.includes(label)
+        ? prev.filter((l) => l !== label)
+        : [...prev, label];
     });
   };
 
   const reasonLen = reasoning.trim().length;
-  const hasRequiredClue = featureSet.length > 0;
+  const hasRequiredClue = videoChoice === "real" ? true : featureSet.length > 0;
   const reasonOk = reasonLen >= MIN_REASON_LEN;
-  const canSubmit = hasRequiredClue && reasonOk && videoChoice;
+  const canSubmit = Boolean(videoChoice) && hasRequiredClue && reasonOk && Number.isFinite(confidence);
+
+  const confidenceLabel = (v) => {
+    if (v <= 2) return "Just guessing 🎲";
+    if (v === 3) return "Hmm… not sure 🤔";
+    if (v === 4) return "Pretty sure ✅";
+    return "Calling it with confidence 💯";
+  };
 
   const getBadge = () => {
     const titles = ["Great Start, Detective!", "Clue Finder!", "Sharp Eyes!", "Final Case Solved!"];
@@ -137,41 +171,41 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
     return { title, emoji, desc };
   };
 
-const handleSubmit = async () => {
-  if (!canSubmit || submitted) return;
+  const handleSubmit = async () => {
+    if (!canSubmit || submitted) return;
 
-  const correct = currentVideo.label === "fake";
-  setIsCorrect(correct);
-  setSubmitted(true);
+    const correct = currentVideo.label === "fake"; // ⚠️ this keeps your earlier logic (ground truth from array)
+    setIsCorrect(correct);
+    setSubmitted(true);
 
-  const payload = {
-    userId,
-    session,
-    timestamp: new Date().toISOString(),
-    videoIndex: currentIndex,          // ✅ send the index
-    video: currentVideo.url,           // video URL
-    label: currentVideo.label,         // actual label
-    userLabel: videoChoice,            // user selection
-    cluesChosen: featureSet,
-    otherFeature: otherFeature.trim() || null,
-    reasoning: reasoning.trim(),
-    confidence,                        // slider value
-    correct
+    const payload = {
+      userId,
+      session,
+      timestamp: new Date().toISOString(),
+      videoIndex: currentIndex,
+      video: currentVideo.url,
+      label: currentVideo.label,
+      userLabel: videoChoice,
+      cluesChosen: videoChoice === "real" ? [EVERYTHING_REAL] : featureSet,
+      otherFeature: videoChoice === "real" ? null : (otherFeature.trim() || null),
+      reasoning: reasoning.trim(),
+      confidence,
+      correct
+    };
+
+    try {
+      const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
+      await fetch(`${backend}/api/detective`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+    }
+
+    setShowBadge(true);
   };
-
-  try {
-    const backend = import.meta.env.VITE_BACKEND_URL || "http://localhost:5050";
-    await fetch(`${backend}/api/detective`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.error("❌ Submission failed:", err);
-  }
-
-  setShowBadge(true);
-};
 
   const handleNext = () => {
     setShowBadge(false);
@@ -185,7 +219,6 @@ const handleSubmit = async () => {
   return (
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-start p-4">
       <div className="bg-yellow-50 border-4 border-blue-400 rounded-2xl shadow-xl w-full max-w-6xl p-6 md:p-10 text-center">
-
         {/* Header + Progress */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-extrabold text-blue-600">{sessionTitle}</h1>
@@ -197,7 +230,7 @@ const handleSubmit = async () => {
         <div className="w-full max-w-3xl mx-auto h-3 bg-orange-200 rounded-full overflow-hidden mb-4">
           <div className="h-3 bg-blue-500" style={{ width: `${progressPct}%` }} />
         </div>
-        
+
         {/* Emoji step dots */}
         <div className="flex justify-center gap-3 mb-4">
           {videos.map((_, i) => {
@@ -222,13 +255,13 @@ const handleSubmit = async () => {
         {/* Instructions */}
         <div className="max-w-3xl mx-auto mb-6">
           <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip carefully and decide if it's real or AI.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">☑️🤖 Click "Everything looked real" if it looks real.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">🔍💡 Check all the apliable clues if you believe it's AI-generated.</p>
-            <p className="text-base md:text-lg leading-relaxed">✏️🗒️ Write a brief reason. And choose your confidence level of your answer.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip and pick your verdict.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">Option 1: <strong>Real</strong> — Everything looked real; no AI clues.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">Option 2: <strong>AI</strong> — Choose the clues that gave it away.</p>
+            <p className="text-base md:text-lg leading-relaxed">📝 Drop a short detective note and your confidence.</p>
           </div>
         </div>
-        
+
         {/* Video Player */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -237,132 +270,147 @@ const handleSubmit = async () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.35 }}
-            className="flex flex-col items-center mb-4"
+            className="flex flex-col items-center mb-6"
           >
             <MediaPlayer src={currentVideo.url} />
           </motion.div>
         </AnimatePresence>
 
-        {/* Real / AI choice */}
-        <div className="flex justify-center gap-6 mb-6">
-          {["real", "fake"].map((option) => (
-            <label key={option} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="videoChoice"
-                value={option}
-                checked={videoChoice === option}
-                onChange={() => setVideoChoice(option)}
-                disabled={submitted}
-                className="w-5 h-5"
-              />
-              <span className="text-gray-800 capitalize">{option === "real" ? "Real" : "AI"}</span>
-            </label>
-          ))}
+        {/* Big Real / AI choice */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-2">
+          <BigChoiceButton
+            active={videoChoice === "real"}
+            color="green"
+            icon="✅"
+            label="Real"
+            sublabel="Everything looked real — no AI clues"
+            onClick={() => handleVideoChoice("real")}
+            disabled={submitted}
+          />
+          <BigChoiceButton
+            active={videoChoice === "fake"}
+            color="red"
+            icon="🤖"
+            label="AI"
+            sublabel="Spot the glitch and pick clues"
+            onClick={() => handleVideoChoice("fake")}
+            disabled={submitted}
+          />
         </div>
 
-        {/* Clues Board */}
-        <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-orange-400 mb-3 text-center">What clues did you notice?</h2>
-          <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-2 max-w-3xl mb-4">
-              {FEATURE_OPTIONS.map((opt, idx) => {
-                const checked = featureSet.includes(opt);
-                const isEverything = opt === EVERYTHING_REAL;
-                const disableThis =
-                  (featureSet.includes(EVERYTHING_REAL) && !isEverything) ||
-                  (isEverything && featureSet.some((o) => o !== EVERYTHING_REAL));
-                return (
-                  <Chip
-                    key={opt}
-                    label={opt}
-                    checked={checked}
-                    onToggle={() => toggleClue(opt)}
-                    emphasis={idx === 0}
-                    disabled={disableThis || submitted}
-                  />
-                );
-              })}
-            </div>
+        {/* AI Clues Drawer (only when AI chosen) */}
+        <AnimatePresence initial={false}>
+          {videoChoice === "fake" && (
+            <motion.div
+              key="clues"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-white border-2 border-orange-300 rounded-xl text-left p-4 md:p-6 max-w-4xl mx-auto mb-6">
+                <h2 className="text-xl md:text-2xl font-bold text-orange-500 mb-3 text-center">What clues did you notice?</h2>
+                <div className="flex flex-col items-center">
+                  <div className="flex flex-wrap justify-center gap-2 max-w-3xl mb-4">
+                    {FEATURE_OPTIONS.map((opt) => (
+                      <Chip
+                        key={opt}
+                        label={opt}
+                        checked={featureSet.includes(opt)}
+                        onToggle={() => toggleClue(opt)}
+                        disabled={submitted}
+                      />
+                    ))}
+                  </div>
 
-            {/* Optional free-text */}
-            <div className="mt-4 w-full max-w-3xl">
-              <input
-                type="text"
-                value={otherFeature}
-                onChange={(e) => setOtherFeature(e.target.value)}
-                placeholder="Other clue you noticed (optional)"
-                className="w-full border rounded-lg p-2"
-                disabled={featureSet.includes(EVERYTHING_REAL) || submitted}
-              />
-            </div>
-
-            {/* Reasoning */}
-            <div className="mt-4 w-full max-w-3xl">
-              <div className="flex items-center justify-between">
-                <div className="font-semibold text-gray-900">
-                  Explain your reasoning in 1–3 sentences
-                  <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} required)</span>
+                  {/* Optional free-text when AI */}
+                  <div className="mt-2 w-full max-w-3xl">
+                    <input
+                      type="text"
+                      value={otherFeature}
+                      onChange={(e) => setOtherFeature(e.target.value)}
+                      placeholder="Other clue you noticed (optional)"
+                      className="w-full border rounded-lg p-2"
+                      disabled={submitted}
+                    />
+                  </div>
                 </div>
               </div>
-              <textarea
-                value={reasoning}
-                onChange={(e) => setReasoning(e.target.value)}
-                rows={3}
-                maxLength={MAX_REASON_LEN}
-                placeholder={`Required: write a short reason (≥ ${MIN_REASON_LEN} characters).`}
-                className="mt-2 w-full border rounded-lg p-3"
-                disabled={submitted}
-              />
-              <div className="mt-1 text-xs">
-                <span className={reasonOk ? "text-green-700" : "text-red-600"}>
-                  {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} needed)`}
-                </span>
-              </div>
-            </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            {/* Confidence */}
-            <div className="mt-4 w-full max-w-3xl">
-              <div className="font-semibold text-gray-900 mb-2">
-                How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min={1}
-                  max={5}
-                  value={confidence}
-                  onChange={(e) => setConfidence(parseInt(e.target.value))}
-                  className="w-full"
-                  disabled={submitted}
-                />
-                <div className="w-10 text-center font-semibold">{confidence}</div>
-              </div>
+        {/* Reasoning */}
+        <div className="bg-white/90 border-2 border-blue-200 rounded-xl p-4 md:p-6 max-w-4xl mx-auto mb-6">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-gray-900">
+              Drop your detective note (1–3 sentences)
+              <span className="ml-2 text-gray-500">({MIN_REASON_LEN}/{MAX_REASON_LEN} required)</span>
             </div>
+          </div>
+          <textarea
+            value={reasoning}
+            onChange={(e) => setReasoning(e.target.value)}
+            rows={3}
+            maxLength={MAX_REASON_LEN}
+            placeholder={
+              videoChoice === "real"
+                ? "Why does this feel authentic? (lighting, natural motion, realistic edges, context…)"
+                : "What gave the AI away? (lips off, waxy skin, jitter, odd reflections…)"
+            }
+            className="mt-2 w-full border rounded-lg p-3"
+            disabled={submitted}
+          />
+          <div className="mt-1 text-xs">
+            <span className={reasonOk ? "text-green-700" : "text-red-600"}>
+              {reasonLen}/{MAX_REASON_LEN} {reasonOk ? "✓" : `characters (≥${MIN_REASON_LEN} needed)`}
+            </span>
+          </div>
+        </div>
+
+        {/* Confidence */}
+        <div className="bg-white/90 border-2 border-green-200 rounded-xl p-4 md:p-6 max-w-4xl mx-auto mb-6">
+          <div className="font-semibold text-gray-900 mb-2">
+            How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={1}
+              max={5}
+              value={confidence}
+              onChange={(e) => setConfidence(parseInt(e.target.value))}
+              className="w-full"
+              disabled={submitted}
+            />
+            <div className="w-48 text-right font-semibold">{confidence} • {confidenceLabel(confidence)}</div>
           </div>
         </div>
 
         {/* Submit / Next */}
-        <div className="mt-4 flex flex-col items-center gap-3">
+        <div className="mt-2 flex flex-col items-center gap-3">
           {!submitted && (
             <div className="flex flex-col items-center gap-2">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className={`px-8 py-3 text-white text-lg font-bold rounded-full
+                className={`px-8 py-3 text-white text-lg font-bold rounded-full shadow-md
                   ${!canSubmit ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
               >
                 Submit Answer
-              </button>
+              </motion.button>
 
               {!canSubmit && (
                 <div className="text-sm text-gray-700 text-center max-w-xl">
                   To submit, please:
                   <ul className="list-disc list-inside text-left">
-                    {!videoChoice && <li>Select if the video is Real or AI.</li>}
-                    {!hasRequiredClue && <li>Choose at least <strong>one</strong> clue above.</li>}
-                    {!reasonOk && <li>Write a brief reason (≥ {MIN_REASON_LEN} characters).</li>}
-                    {!confidence && <li>Set your confidence level (1–5).</li>}
+                    {!videoChoice && <li>Choose <strong>Real</strong> or <strong>AI</strong>.</li>}
+                    {videoChoice === "fake" && featureSet.length === 0 && (
+                      <li>Pick at least <strong>one</strong> AI clue.</li>
+                    )}
+                    {!reasonOk && <li>Write a brief note (≥ {MIN_REASON_LEN} characters).</li>}
                   </ul>
                 </div>
               )}
@@ -393,7 +441,6 @@ const handleSubmit = async () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
