@@ -52,14 +52,20 @@ function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabl
     ? `${color}-600 text-white border-${color}-700`
     : `bg-white text-${color}-700 border-${color}-400 hover:bg-${color}-50`;
 
+  // Preserve active text if disabled
+  const disabledCls = disabled
+    ? active
+      ? `bg-gray-200 text-white border-gray-300 cursor-not-allowed opacity-100`
+      : `bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed opacity-100`
+    : "";
+
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       disabled={disabled}
       className={`px-6 md:px-8 py-4 md:py-5 rounded-2xl border-4 text-lg md:text-xl font-extrabold shadow-md flex items-center gap-3 transition
-        ${activeCls}
-        ${disabled ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed opacity-100" : ""}
+        ${activeCls} ${disabledCls}
       `}
     >
       <span className="text-2xl md:text-3xl">{icon}</span>
@@ -70,6 +76,7 @@ function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabl
     </motion.button>
   );
 }
+
 
 function Chip({ checked, label, onToggle, disabled = false }) {
   return (
@@ -358,8 +365,8 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
             maxLength={MAX_REASON_LEN}
             placeholder={
               videoChoice === "real"
-                ? "Why does this feel authentic? (lighting, natural motion, realistic edges, context…)"
-                : "What gave the AI away? (lips off, waxy skin, jitter, odd reflections…)"
+           ? "Why does this feel authentic? Consider lighting, shadows, motion, facial expressions, edges, context…"
+           : "What gave the AI away? Consider facial expressions, reflections, lighting, background, context, knowledge or facts…"
             }
             disabled={submitted}
             className={`mt-2 w-full border rounded-lg p-3
