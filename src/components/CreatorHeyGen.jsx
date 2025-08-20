@@ -66,15 +66,15 @@ export default function CreatorMode({ onComplete }) {
     <div className="min-h-screen bg-yellow-100 flex flex-col items-center py-10 px-4">
       {/* Title */}
       <h1 className="text-4xl font-bold text-orange-600 mb-6 text-center">
-        AI Avatar Maker
+        🗣️ AI Avatar Maker 🎥
       </h1>
 
       {/* Friendly step-by-step instructions */}
-      <div className="mx-auto max-w-md bg-yellow-100 border-2 border-yellow-200 rounded-xl p-4 mb-6 text-left text-lg shadow-md">
+      <div className="mx-auto max-w-md bg-yellow-180 border-2 border-yellow-200 rounded-xl p-4 mb-6 text-left text-md shadow-md">
         🎭 Step 1: Pick a character.<br />
-        💬 Step 2: Pick what they should say.<br />
-        ⏳ Step 3: Wait while your avatar is made.<br />
-        🎬 Step 4: Watch your AI-made video!
+        💬 Step 2: Pick a sentence.<br />
+        ⏳ Step 3: Wait while the avatar is made.<br />
+        🎬 Step 4: Watch the AI-made avatar!
       </div>
 
       <div className="flex flex-col md:flex-row gap-12 items-center">
@@ -99,7 +99,7 @@ export default function CreatorMode({ onComplete }) {
 
         {/* Phrase selection */}
         <div className="flex flex-col items-center gap-6">
-          <h2 className="text-xl font-semibold text-blue-900">Choose a phrase</h2>
+          <h2 className="text-xl font-semibold text-blue-900">Choose a sentence</h2>
           <div className="flex flex-col gap-3">
             {phrases.map((text, index) => (
               <button
@@ -122,7 +122,7 @@ export default function CreatorMode({ onComplete }) {
         disabled={!selectedCharacter || selectedPhraseIndex === null}
         className="mt-8 bg-orange-500 text-white font-bold py-3 px-10 rounded-md hover:bg-orange-600 transition disabled:opacity-50"
       >
-        Make Avatar Video
+        Make An Avatar
       </button>
 
       {/* Modal */}
@@ -134,10 +134,10 @@ export default function CreatorMode({ onComplete }) {
             {/* Loading state with progress bar */}
             {loading && (
               <div className="flex flex-col items-center justify-center py-10 w-full" aria-busy="true">
-                <p className="text-blue-800 font-medium text-lg mb-4">Making the avatar...</p>
+                <p className="text-blue-800 font-medium text-lg mb-4"> 🗣️Processing...🎥 </p>
                 <div className="w-3/4 max-w-md bg-gray-200 rounded-full h-4 overflow-hidden">
                   <div
-                    className="bg-orange-500 h-4 rounded-full animate-progressFill"
+                    className="bg-organge-300 h-4 rounded-full animate-progressFill"
                     style={{ animationDuration: `${LOADING_MS}ms` }}
                   />
                 </div>
@@ -172,8 +172,8 @@ export default function CreatorMode({ onComplete }) {
             {/* Kids note */}
             {!loading && (
               <p className="mt-6 text-sm text-blue-800">
-                <strong>Note:</strong> This shows how an AI avatar can be made from just a face image and a voice clip.
-                Talk about when it’s OK to use this technology—and when it isn’t.
+                <strong>Note:</strong> This shows how an AI avatar can be made from just a photo and a script.
+                How do you think about it?💭
               </p>
             )}
 
