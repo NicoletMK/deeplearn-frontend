@@ -154,12 +154,23 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const reasonOk = reasonLen >= MIN_REASON_LEN;
   const canSubmit = Boolean(videoChoice) && hasRequiredClue && reasonOk && Number.isFinite(confidence);
 
-  const confidenceLabel = (v) => {
-    if (v <= 2) return "Just guessing 🎲";
-    if (v === 3) return "Hmm… not sure 🤔";
-    if (v === 4) return "Pretty sure ✅";
-    return "Calling it with confidence 💯";
-  };
+const confidenceLabel = (v) => {
+  switch (v) {
+    case 1:
+      return "Wild guess🎲";
+    case 2:
+      return "Somewhat unsure🤔";
+    case 3:
+      return "Fairly confident🕵️ ";
+    case 4:
+      return "Pretty sure✅";
+    case 5:
+      return "Expert-level confidence💯";
+    default:
+      return "";
+  }
+};
+
 
   const getBadge = () => {
     const titles = ["Great Start, Detective!", "Clue Finder!", "Sharp Eyes!", "Final Case Solved!"];
@@ -363,11 +374,11 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
             onChange={(e) => setReasoning(e.target.value)}
             rows={3}
             maxLength={MAX_REASON_LEN}
-            placeholder={
-              videoChoice === "real"
-           ? "Why does this feel authentic? Consider lighting, shadows, motion, facial expressions, edges, context…"
-           : "What gave the AI away? Consider facial expressions, reflections, lighting, background, context, knowledge or facts…"
-            }
+placeholder={
+  videoChoice === "real"
+    ? "Why does this feel authentic? Think about lighting, shadows, natural motion, facial expressions, edges, context, or other subtle cues that make it believable…"
+    : "What gave the AI away? Look for facial expressions, reflections, lighting, background, context, inconsistencies, historical or factual errors, or other clues…"
+}
             disabled={submitted}
             className={`mt-2 w-full border rounded-lg p-3
               ${submitted ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed" : "bg-white text-gray-800 border-gray-300 focus:ring focus:ring-blue-200"}
