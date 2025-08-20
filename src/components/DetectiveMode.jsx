@@ -156,23 +156,6 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const reasonOk = reasonLen >= MIN_REASON_LEN;
   const canSubmit = Boolean(videoChoice) && hasRequiredClue && reasonOk && Number.isFinite(confidence);
 
-const confidenceLabel = (v) => {
-  switch (v) {
-    case 1:
-      return "Wild guess🎲";
-    case 2:
-      return "Somewhat unsure🤔";
-    case 3:
-      return "Fairly confident🕵️ ";
-    case 4:
-      return "Pretty sure✅";
-    case 5:
-      return "Expert-level confidence💯";
-    default:
-      return "";
-  }
-};
-
 
   const getBadge = () => {
     const titles = ["Great Start, Detective!", "Clue Finder!", "Sharp Eyes!", "Final Case Solved!"];
