@@ -20,7 +20,6 @@ export default function CreatorMode() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(true);
 
   const handleSelect = (face) => {
     setLoading(true);
@@ -61,49 +60,28 @@ export default function CreatorMode() {
             transition={{ duration: 0.5 }}
             className="bg-white p-6 rounded-xl shadow-xl text-lg font-semibold border-4 border-yellow-300 text-center"
           >
-            ⏳ Creating your fun face swap video… 🎭
+            🎭Creating your deepfake video…⏳ 
           </motion.div>
         </motion.div>
       )}
 
-{/* Page title */}
-<h1 className="text-3xl font-bold text-center mb-2">
-  🎭 Create Your DeepFake Video by Face Swapping!
-</h1>
+      {/* Page title */}
+      <h1 className="text-3xl font-bold text-center mb-2">
+        🎬Create Your DeepFake Video by Face Swapping🎭
+      </h1>
 
-{/* Kid-friendly instructions */}
-<div className="mx-auto max-w-md bg-yellow-200 border-2 border-yellow-400 rounded-xl p-4 mb-6 text-center text-sm shadow-md">
-  🐣 Step 1: Pick a face from the Human or Fantasy options. <br />
-  🐣 Step 2: Wait until the face-swapped video appears. <br />
-  🐣 Step 3: Press "▶ Play Both Videos" and compare them! 🔍✨
-</div>
-
-      {/* How-to popup */}
-      {showPrompt && (
-        <div className="fixed bottom-6 right-6 bg-white border-4 border-orange-400 shadow-lg p-4 rounded-xl z-50 max-w-xs text-left">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-lg font-bold text-orange-600 mb-1"> How to Use</h2>
-              <p className="text-sm text-gray-800">
-                Tap a human face or a fantasy face to apply it to the video. Try playing the original and your new video together to see the changes!
-              </p>
-            </div>
-            <button
-              onClick={() => setShowPrompt(false)}
-              className="text-gray-500 hover:text-red-500 ml-3 font-bold text-lg"
-              aria-label="Close how to use popup"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Kid-friendly instructions under title */}
+      <div className="mx-auto max-w-md bg-yellow-200 border-2 border-yellow-400 rounded-xl p-4 mb-6 text-center text-sm shadow-md">
+        🎭 Step 1: Pick a face from the Human or Fantasy options. <br />
+        ⏳ Step 2: Wait until the face-swapped video appears. <br />
+        🔍 Step 3: Press "▶ Play Both Videos" and compare them! 
+      </div>
 
       {/* Main content */}
       <div className="flex flex-col md:flex-row gap-6 mt-6">
         {/* Human options */}
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-center mb-4">👦 Human Faces</h2>
+          <h2 className="text-xl font-semibold text-center mb-4">👦Human Faces👧</h2>
           <div className="flex flex-col gap-3">
             {humanOptions.map((face, idx) => (
               <button
@@ -126,7 +104,7 @@ export default function CreatorMode() {
 
         {/* Center videos */}
         <div className="flex-1 text-center relative">
-          <h2 className="text-xl font-semibold mb-2">🎥 Original Base Video</h2>
+          <h2 className="text-xl font-semibold mb-2">🎥Original Base Video</h2>
           <video
             id="originalVideo"
             src="/videos/creator/Vid.mp4"
@@ -136,7 +114,7 @@ export default function CreatorMode() {
 
           {selected && (
             <>
-              <h2 className="text-xl font-semibold mb-2">✨ Your Face Swap Video</h2>
+              <h2 className="text-xl font-semibold mb-2">✨Your Face Swap Video</h2>
               <video
                 id="swappedVideo"
                 src={selected.video}
@@ -161,7 +139,7 @@ export default function CreatorMode() {
 
         {/* Nonhuman options */}
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-center mb-4">🧸 Fantasy Faces</h2>
+          <h2 className="text-xl font-semibold text-center mb-4">🗿Fantasy Faces🐼</h2>
           <div className="flex flex-col gap-3">
             {nonhumanOptions.map((face, idx) => (
               <button
