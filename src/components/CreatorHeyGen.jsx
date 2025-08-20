@@ -39,7 +39,7 @@ export default function CreatorMode({ onComplete }) {
   const [loading, setLoading] = useState(false);
 
   // Keep the timeout and the progress bar duration in sync
-  const LOADING_MS = 2000;
+  const LOADING_MS = 3000;
 
   const generateVideo = () => {
     if (selectedCharacter && selectedPhraseIndex !== null) {
@@ -71,10 +71,10 @@ export default function CreatorMode({ onComplete }) {
 
       {/* Friendly step-by-step instructions */}
       <div className="mx-auto max-w-md bg-yellow-180 border-2 border-yellow-200 rounded-xl p-4 mb-6 text-left text-md shadow-md">
-        🎭 Step 1: Pick a character.<br />
-        💬 Step 2: Pick a sentence.<br />
-        ⏳ Step 3: Wait while the avatar is made.<br />
-        🎬 Step 4: Watch the AI-made avatar!
+        Step 1: Pick a character.<br />
+        Step 2: Pick a sentence.<br />
+        Step 3: Click the button to create.<br />
+        Step 4: Wait and watch the AI-made avatar!
       </div>
 
       <div className="flex flex-col md:flex-row gap-12 items-center">
@@ -90,14 +90,14 @@ export default function CreatorMode({ onComplete }) {
                   selectedCharacter?.name === char.name ? 'border-orange-500' : 'border-transparent'
                 }`}
               >
-                <img src={char.image} alt={char.name} className="w-36 h-36 rounded-full object-cover" />
+                <img src={char.image} alt={char.name} className="w-56 h-56 rounded-full object-cover" />
                 <div className="text-sm mt-2 text-blue-900 font-medium text-center">{char.name}</div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Phrase selection */}
+        {/* Sentence selection */}
         <div className="flex flex-col items-center gap-6">
           <h2 className="text-xl font-semibold text-blue-900">Choose a sentence</h2>
           <div className="flex flex-col gap-3">
@@ -105,7 +105,7 @@ export default function CreatorMode({ onComplete }) {
               <button
                 key={index}
                 onClick={() => setSelectedPhraseIndex(index)}
-                className={`px-5 py-3 text-sm rounded-full border w-60 text-center transition ${
+                className={`px-5 py-3 text-md rounded-full border w-60 text-center transition ${
                   selectedPhraseIndex === index ? 'border-orange-500 bg-orange-100' : 'border-blue-300'
                 }`}
               >
@@ -137,7 +137,7 @@ export default function CreatorMode({ onComplete }) {
                 <p className="text-blue-800 font-medium text-lg mb-4"> 🗣️Processing...🎥 </p>
                 <div className="w-3/4 max-w-md bg-gray-200 rounded-full h-4 overflow-hidden">
                   <div
-                    className="bg-organge-300 h-4 rounded-full animate-progressFill"
+                    className="bg-orange-300 h-4 rounded-full animate-progressFill"
                     style={{ animationDuration: `${LOADING_MS}ms` }}
                   />
                 </div>
