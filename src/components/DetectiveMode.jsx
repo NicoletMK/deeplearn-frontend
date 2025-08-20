@@ -393,12 +393,30 @@ placeholder={
           </div>
         </div>
 
-        {/* Confidence */}
-        <div className="bg-white/90 border-2 border-green-200 rounded-xl p-4 md:p-6 max-w-4xl mx-auto mb-6">
-          <div className="font-semibold text-gray-900 mb-2">
-            How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
-          </div>
-<div className="flex items-center gap-3">
+ {/* Confidence */}
+<div className="bg-white/90 border-2 border-green-200 rounded-xl p-4 md:p-6 max-w-4xl mx-auto mb-6">
+  <div className="font-semibold text-gray-900 mb-2">
+    How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
+  </div>
+
+  {/* Icons / tooltips above slider */}
+  <div className="flex justify-between mb-1">
+    {[
+      "🎲", // 1
+      "🤔", // 2
+      "🕵️", // 3
+      "✅", // 4
+      "💯"  // 5
+    ].map((icon, idx) => (
+      <div key={idx} className="text-center w-1/5 text-lg md:text-xl">
+        <span className={`transition-transform ${confidence === idx + 1 ? "scale-125" : ""}`}>
+          {icon}
+        </span>
+      </div>
+    ))}
+  </div>
+
+  {/* Slider */}
   <input
     type="range"
     min={1}
@@ -416,9 +434,28 @@ placeholder={
         #e5e7eb ${(confidence-1)/4*100}%, #e5e7eb 100%)`
     }}
   />
-  <div className="w-48 text-right font-semibold">{confidence}.{confidenceLabel(confidence)}</div>
+
+  {/* Labels below slider */}
+  <div className="flex justify-between mt-2 text-sm md:text-base font-medium">
+    {[
+      "1. Just guessing",
+      "2. Somewhat unsure",
+      "3. Fairly confident",
+      "4. Pretty sure",
+      "5. Expert-level"
+    ].map((label, idx) => (
+      <span
+        key={idx}
+        className={`transition-colors ${
+          confidence === idx + 1 ? "text-blue-600 font-bold" : "text-gray-700"
+        }`}
+      >
+        {label}
+      </span>
+    ))}
+  </div>
 </div>
-        </div>
+
 
         {/* Submit / Next */}
         <div className="mt-2 flex flex-col items-center gap-3">
