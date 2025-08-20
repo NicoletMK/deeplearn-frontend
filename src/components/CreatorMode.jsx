@@ -16,12 +16,32 @@ const nonhumanOptions = [
   { label: 'Cartoon 2', image: '/characters/Nonhuman4.png', video: '/videos/creator/Nonhuman4.mp4' },
 ];
 
+// Prompts
+const humanPrompts = [
+  "I love learning about AI!",
+  "Let's make a DeepFake adventure!",
+  "Technology is amazing!",
+  "Watch me transform!",
+  "Let's bring some magic to life!"
+];
+
+const fantasyPrompts = [
+  "I'm coming to life from the fantasy world!",
+  "Let's make some magic happen!",
+  "Time to show my true colors!",
+  "Can you believe this is real?",
+  "Prepare for a fun surprise!"
+];
+
 export default function CreatorMode() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showPrompt, setShowPrompt] = useState(true);
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [overlayMode, setOverlayMode] = useState(false);
 
+  // Handle face selection
   const handleSelect = (face) => {
     setLoading(true);
     setSelected(null);
@@ -29,8 +49,20 @@ export default function CreatorMode() {
       setSelected(face);
       setLoading(false);
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 1000);
+      // Set default prompt based on type
+      setCurrentPrompt(humanOptions.includes(face) ? randomPrompt(humanPrompts) : randomPrompt(fantasyPrompts));
+      setTimeout(() => setShowConfetti(false), 1500);
     }, 5000);
+  };
+
+  // Random prompt helper
+  const randomPrompt = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  // Randomize current prompt
+  const handleRandomPrompt = () => {
+    if (!selected) return;
+    const prompts = humanOptions.includes(selected) ? humanPrompts : fantasyPrompts;
+    setCurrentPrompt(randomPrompt(prompts));
   };
 
   return (
@@ -90,7 +122,7 @@ export default function CreatorMode() {
                 <img
                   src={face.image}
                   alt={face.label}
-                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105"
+                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105 hover:rotate-1 transition-transform"
                 />
                 <div className="text-sm mt-1 font-medium text-center">{face.label}</div>
               </button>
@@ -98,14 +130,54 @@ export default function CreatorMode() {
           </div>
         </div>
 
-        {/* Center videos */}
+        {/* Center videos & prompts */}
         <div className="flex-1 text-center">
           <h2 className="text-xl font-semibold mb-2">🎥 Original Base Video</h2>
           <video src="/videos/creator/Vid.mp4" controls className="mx-auto rounded-lg shadow-xl w-full max-w-md mb-6" />
+          
           {selected && (
             <>
               <h2 className="text-xl font-semibold mb-2">✨ Your DeepFake Video</h2>
-              <video src={selected.video} controls className="mx-auto rounded-lg shadow-xl w-full max-w-md" />
+
+              <div className="mb-4">
+                <button
+                  onClick={() => setOverlayMode(!overlayMode)}
+                  className="bg-blue-400 text-white px-4 py-2 rounded-lg mb-2 hover:bg-blue-500 transition"
+                >
+                  {overlayMode ? 'Switch to Side-by-Side' : 'Switch to Overlay'}
+                </button>
+              </div>
+
+              <div className="relative w-full max-w-md mx-auto">
+                {overlayMode ? (
+                  <>
+                    <video src="/videos/creator/Vid.mp4" autoPlay loop muted className="absolute inset-0 w-full rounded-lg opacity-50" />
+                    <video src={selected.video} autoPlay loop muted className="relative w-full rounded-lg" />
+                  </>
+                ) : (
+                  <div className="flex gap-2">
+                    <video src="/videos/creator/Vid.mp4" controls className="w-1/2 rounded-lg" />
+                    <video src={selected.video} controls className="w-1/2 rounded-lg" />
+                  </div>
+                )}
+              </div>
+
+              {/* Prompt input & randomizer */}
+              <div className="mt-4 flex flex-col gap-2 items-center">
+                <input
+                  type="text"
+                  value={currentPrompt}
+                  onChange={(e) => setCurrentPrompt(e.target.value)}
+                  className="w-full max-w-md border rounded-lg p-2 text-center"
+                  placeholder="Enter your voice prompt..."
+                />
+                <button
+                  onClick={handleRandomPrompt}
+                  className="bg-purple-400 text-white px-4 py-2 rounded-lg hover:bg-purple-500 transition"
+                >
+                  🎲 Randomize Prompt
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -123,7 +195,7 @@ export default function CreatorMode() {
                 <img
                   src={face.image}
                   alt={face.label}
-                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105"
+                  className="w-3/4 mx-auto rounded-xl shadow-md hover:scale-105 hover:rotate-1 transition-transform"
                 />
                 <div className="text-sm mt-1 font-medium text-center">{face.label}</div>
               </button>
