@@ -48,15 +48,16 @@ function MediaPlayer({ src }) {
 }
 
 function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabled }) {
+  // Base styles for active vs inactive
   const activeCls = active
-    ? `${color}-600 text-white border-${color}-700`
+    ? `bg-${color}-600 text-white border-${color}-700`
     : `bg-white text-${color}-700 border-${color}-400 hover:bg-${color}-50`;
 
-  // Preserve active text if disabled
+  // Handle disabled state
   const disabledCls = disabled
     ? active
-      ? `bg-gray-200 text-white border-gray-300 cursor-not-allowed opacity-100`
-      : `bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed opacity-100`
+      ? `bg-${color}-600 text-white border-${color}-700 cursor-not-allowed opacity-80` // preserve active color
+      : `bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed opacity-80`
     : "";
 
   return (
@@ -76,6 +77,7 @@ function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabl
     </motion.button>
   );
 }
+
 
 
 function Chip({ checked, label, onToggle, disabled = false }) {
@@ -414,7 +416,7 @@ placeholder={
         #e5e7eb ${(confidence-1)/4*100}%, #e5e7eb 100%)`
     }}
   />
-  <div className="w-48 text-right font-semibold">{confidence} • {confidenceLabel(confidence)}</div>
+  <div className="w-48 text-right font-semibold">{confidence}.{confidenceLabel(confidence)}</div>
 </div>
         </div>
 
