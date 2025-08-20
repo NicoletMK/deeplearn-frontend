@@ -81,7 +81,7 @@ export default function CreatorMode() {
       <div className="flex flex-col md:flex-row gap-6 mt-6">
         {/* Human options */}
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-center mb-4">👦Human Faces👧</h2>
+          <h2 className="text-xl font-semibold text-center mb-4">👦 Human Faces</h2>
           <div className="flex flex-col gap-3">
             {humanOptions.map((face, idx) => (
               <button
@@ -104,7 +104,7 @@ export default function CreatorMode() {
 
         {/* Center videos */}
         <div className="flex-1 text-center relative">
-          <h2 className="text-xl font-semibold mb-2">🎥Original Base Video</h2>
+          <h2 className="text-xl font-semibold mb-2">🎥 Real Base Video</h2>
           <video
             id="originalVideo"
             src="/videos/creator/Vid.mp4"
@@ -114,7 +114,7 @@ export default function CreatorMode() {
 
           {selected && (
             <>
-              <h2 className="text-xl font-semibold mb-2">✨Your Face Swap Video</h2>
+              <h2 className="text-xl font-semibold mb-2">✨ Face Swap Video</h2>
               <video
                 id="swappedVideo"
                 src={selected.video}
@@ -122,17 +122,16 @@ export default function CreatorMode() {
                 className="mx-auto rounded-lg shadow-xl w-full max-w-md mb-2"
               />
 
-              {/* Kid-friendly comparison prompt */}
-              <div className="mt-2 bg-white rounded-xl border-2 border-yellow-400 p-3 shadow-md max-w-md mx-auto animate-pulse">
-                👀 Press "▶ Play Both Videos" and see if you can spot the differences! 🔍✨
-              </div>
-
               <button
                 onClick={playBothVideos}
                 className="bg-green-400 text-white px-4 py-2 rounded-lg mt-2 hover:bg-green-500 transition"
               >
                 ▶ Play Both Videos!
               </button>
+  
+              <div className="mt-2 bg-white rounded-xl border-2 border-yellow-400 p-3 shadow-md max-w-md mx-auto animate-pulse">
+                 👀 Press "▶ Play Both Videos" and compare REAL VS AI! 🔍
+              </div>
             </>
           )}
         </div>
