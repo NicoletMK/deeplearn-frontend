@@ -11,6 +11,7 @@ const FEATURE_OPTIONS = [
   "Odd or too regular blinking",
   "Face boundaries / edges look wrong",
   "Skin too smooth or waxy",
+  "Expressions or emotions feel unnatural",
   "Lighting/shadows inconsistent",
   "Reflections don’t match",
   "Hands or fingers look strange",
@@ -19,8 +20,7 @@ const FEATURE_OPTIONS = [
   "Background unrealistic or warping",
   "Temporal inconsistencies across frames",
   "Scenario or context seems impossible",
-  "Historically or contextually unreasonable",
-  "Expressions or emotions feel unnatural"
+  "Historically or contextually unreasonable"
 ];
 
 const EMOJIS = ["🎭", "🕶️", "😂", "💰", "📰", "🎤", "🧪", "🎬", "🧍", "🧠"];
@@ -51,12 +51,16 @@ function BigChoiceButton({ active, color, icon, label, sublabel, onClick, disabl
   const activeCls = active
     ? `${color}-600 text-white border-${color}-700`
     : `bg-white text-${color}-700 border-${color}-400 hover:bg-${color}-50`;
+
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       disabled={disabled}
-      className={`px-6 md:px-8 py-4 md:py-5 rounded-2xl border-4 text-lg md:text-xl font-extrabold shadow-md flex items-center gap-3 transition ${activeCls} disabled:opacity-60`}
+      className={`px-6 md:px-8 py-4 md:py-5 rounded-2xl border-4 text-lg md:text-xl font-extrabold shadow-md flex items-center gap-3 transition
+        ${activeCls}
+        ${disabled ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed opacity-100" : ""}
+      `}
     >
       <span className="text-2xl md:text-3xl">{icon}</span>
       <div className="text-left leading-tight">
@@ -75,8 +79,9 @@ function Chip({ checked, label, onToggle, disabled = false }) {
       disabled={disabled}
       whileTap={{ scale: 0.95 }}
       className={`px-3 py-2 rounded-full border transition text-sm md:text-base shadow-sm
-        ${disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-50"}
-        ${checked ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}`}
+        ${checked ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}
+        ${disabled ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed" : "hover:bg-blue-50"}
+      `}
     >
       {label}
     </motion.button>
@@ -123,23 +128,18 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const handleVideoChoice = (choice) => {
     setVideoChoice(choice);
     if (choice === "real") {
-      // Auto-select the single REAL option and lock clues
       setFeatureSet([EVERYTHING_REAL]);
       setOtherFeature("");
     } else if (choice === "fake") {
-      // Remove REAL option and let them pick clues
       setFeatureSet((prev) => prev.filter((f) => f !== EVERYTHING_REAL));
     }
   };
 
   const toggleClue = (label) => {
-    // Only applicable when AI is chosen
     if (videoChoice !== "fake") return;
-    setFeatureSet((prev) => {
-      return prev.includes(label)
-        ? prev.filter((l) => l !== label)
-        : [...prev, label];
-    });
+    setFeatureSet((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
   };
 
   const reasonLen = reasoning.trim().length;
@@ -174,7 +174,7 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
   const handleSubmit = async () => {
     if (!canSubmit || submitted) return;
 
-    const correct = currentVideo.label === "fake"; // ⚠️ this keeps your earlier logic (ground truth from array)
+    const correct = currentVideo.label === "fake";
     setIsCorrect(correct);
     setSubmitted(true);
 
@@ -255,9 +255,9 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
         {/* Instructions */}
         <div className="max-w-3xl mx-auto mb-6">
           <div className="bg-white/80 border-2 border-orange-300 rounded-2xl p-6 md:p-8 text-gray-900 text-center shadow-md">
-            <p className="text-base md:text-lg leading-relaxed mb-3">🎥👀 Watch the clip and pick your verdict.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">Option 1: <strong>Real</strong> — Everything looked real; no AI clues.</p>
-            <p className="text-base md:text-lg leading-relaxed mb-3">Option 2: <strong>AI</strong> — Choose the clues that gave it away.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">🎥 Watch the clip and pick your verdict.</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">Choose <strong>Real</strong> if everything looked real — no AI tricks spotted!</p>
+            <p className="text-base md:text-lg leading-relaxed mb-3">Choose <strong>AI</strong> and click all the clues that gave it away.</p>
             <p className="text-base md:text-lg leading-relaxed">📝 Drop a short detective note and your confidence.</p>
           </div>
         </div>
@@ -331,8 +331,10 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
                       value={otherFeature}
                       onChange={(e) => setOtherFeature(e.target.value)}
                       placeholder="Other clue you noticed (optional)"
-                      className="w-full border rounded-lg p-2"
                       disabled={submitted}
+                      className={`w-full border rounded-lg p-2
+                        ${submitted ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed" : "bg-white text-gray-800 border-gray-300 focus:ring focus:ring-blue-200"}
+                      `}
                     />
                   </div>
                 </div>
@@ -359,8 +361,10 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
                 ? "Why does this feel authentic? (lighting, natural motion, realistic edges, context…)"
                 : "What gave the AI away? (lips off, waxy skin, jitter, odd reflections…)"
             }
-            className="mt-2 w-full border rounded-lg p-3"
             disabled={submitted}
+            className={`mt-2 w-full border rounded-lg p-3
+              ${submitted ? "bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed" : "bg-white text-gray-800 border-gray-300 focus:ring focus:ring-blue-200"}
+            `}
           />
           <div className="mt-1 text-xs">
             <span className={reasonOk ? "text-green-700" : "text-red-600"}>
@@ -374,18 +378,26 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
           <div className="font-semibold text-gray-900 mb-2">
             How confident are you? <span className="text-gray-500">(1 = Not sure, 5 = Very sure)</span>
           </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={1}
-              max={5}
-              value={confidence}
-              onChange={(e) => setConfidence(parseInt(e.target.value))}
-              className="w-full"
-              disabled={submitted}
-            />
-            <div className="w-48 text-right font-semibold">{confidence} • {confidenceLabel(confidence)}</div>
-          </div>
+<div className="flex items-center gap-3">
+  <input
+    type="range"
+    min={1}
+    max={5}
+    value={confidence}
+    onChange={(e) => setConfidence(parseInt(e.target.value))}
+    disabled={submitted}
+    className={`w-full accent-transparent h-2 rounded-full appearance-none
+      ${submitted ? "cursor-not-allowed" : ""}
+    `}
+    style={{
+      background: `linear-gradient(to right, 
+        ${["#f87171","#fbbf24","#facc15","#34d399","#22c55e"][confidence-1]} 0%, 
+        ${["#f87171","#fbbf24","#facc15","#34d399","#22c55e"][confidence-1]} ${(confidence-1)/4*100}%, 
+        #e5e7eb ${(confidence-1)/4*100}%, #e5e7eb 100%)`
+    }}
+  />
+  <div className="w-48 text-right font-semibold">{confidence} • {confidenceLabel(confidence)}</div>
+</div>
         </div>
 
         {/* Submit / Next */}
@@ -406,41 +418,33 @@ export default function DetectiveMode({ session = "pre", onComplete }) {
                 <div className="text-sm text-gray-700 text-center max-w-xl">
                   To submit, please:
                   <ul className="list-disc list-inside text-left">
-                    {!videoChoice && <li>Choose <strong>Real</strong> or <strong>AI</strong>.</li>}
-                    {videoChoice === "fake" && featureSet.length === 0 && (
-                      <li>Pick at least <strong>one</strong> AI clue.</li>
-                    )}
-                    {!reasonOk && <li>Write a brief note (≥ {MIN_REASON_LEN} characters).</li>}
+                    {!videoChoice && <li>Choose <strong>Real</strong> or <strong>AI</strong></li>}
+                    {videoChoice === "fake" && featureSet.length === 0 && <li>Pick at least one clue</li>}
+                    {!reasonOk && <li>Write at least {MIN_REASON_LEN} characters in reasoning</li>}
                   </ul>
                 </div>
               )}
             </div>
           )}
-        </div>
 
-        {/* Badge modal */}
-        {showBadge && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl border-4 border-yellow-200 p-8 max-w-md w-full text-center">
-              {(() => {
-                const { title, emoji, desc } = getBadge();
-                return (
-                  <>
-                    <div className="text-6xl mb-3">{emoji}</div>
-                    <h2 className="text-2xl font-bold text-blue-900 mb-2">{title}</h2>
-                    <p className="text-gray-800 mb-6">{desc}</p>
-                  </>
-                );
-              })()}
+          {submitted && showBadge && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="bg-white border-4 border-green-500 rounded-2xl p-6 shadow-xl text-center max-w-md"
+            >
+              <div className="text-3xl mb-2">{getBadge().emoji}</div>
+              <div className="font-bold text-xl mb-2">{getBadge().title}</div>
+              <div className="text-gray-800">{getBadge().desc}</div>
               <button
                 onClick={handleNext}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full"
+                className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 font-semibold"
               >
-                {currentIndex === total - 1 ? "Finish" : "Continue"}
+                Next Case
               </button>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );
