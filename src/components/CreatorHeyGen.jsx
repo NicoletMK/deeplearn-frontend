@@ -36,13 +36,21 @@ export default function CreatorMode({ onComplete }) {
   const [selectedPhraseIndex, setSelectedPhraseIndex] = useState(null);
   const [generatedVideo, setGeneratedVideo] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Keep the timeout and the progress bar duration in sync
+  const LOADING_MS = 2000;
 
   const generateVideo = () => {
     if (selectedCharacter && selectedPhraseIndex !== null) {
-      // Get the pre-made video based on selected character and phrase
-      const videoPath = videoMap[selectedCharacter.voice][selectedPhraseIndex];
-      setGeneratedVideo(videoPath);
       setShowModal(true);
+      setLoading(true);
+
+      setTimeout(() => {
+        const videoPath = videoMap[selectedCharacter.voice][selectedPhraseIndex];
+        setGeneratedVideo(videoPath);
+        setLoading(false);
+      }, LOADING_MS);
     }
   };
 
@@ -51,17 +59,26 @@ export default function CreatorMode({ onComplete }) {
     setSelectedPhraseIndex(null);
     setGeneratedVideo(null);
     setShowModal(false);
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-yellow-100 flex flex-col items-center py-10">
-      <h1 className="text-4xl font-bold text-orange-600 mb-6">Deepfake Creator</h1>
+    <div className="min-h-screen bg-yellow-100 flex flex-col items-center py-10 px-4">
+      {/* Title */}
+      <h1 className="text-4xl font-bold text-orange-600 mb-6 text-center">
+        AI Avatar Maker
+      </h1>
 
-      <p className="max-w-xl text-center text-blue-900 font-medium mb-6">
-        Select a character and a phrase. You'll see how AI creates a talking video by combining just an image and a sound — this is called a <strong>deepfake</strong>!
-      </p>
+      {/* Friendly step-by-step instructions */}
+      <div className="mx-auto max-w-md bg-yellow-100 border-2 border-yellow-200 rounded-xl p-4 mb-6 text-left text-lg shadow-md">
+        🎭 Step 1: Pick a character.<br />
+        💬 Step 2: Pick what they should say.<br />
+        ⏳ Step 3: Wait while your avatar is made.<br />
+        🎬 Step 4: Watch your AI-made video!
+      </div>
 
       <div className="flex flex-col md:flex-row gap-12 items-center">
+        {/* Character selection */}
         <div className="flex flex-col items-center gap-6">
           <h2 className="text-xl font-semibold text-blue-900">Choose a character</h2>
           <div className="flex gap-4">
@@ -80,6 +97,7 @@ export default function CreatorMode({ onComplete }) {
           </div>
         </div>
 
+        {/* Phrase selection */}
         <div className="flex flex-col items-center gap-6">
           <h2 className="text-xl font-semibold text-blue-900">Choose a phrase</h2>
           <div className="flex flex-col gap-3">
@@ -98,48 +116,76 @@ export default function CreatorMode({ onComplete }) {
         </div>
       </div>
 
+      {/* Generate button */}
       <button
         onClick={generateVideo}
         disabled={!selectedCharacter || selectedPhraseIndex === null}
         className="mt-8 bg-orange-500 text-white font-bold py-3 px-10 rounded-md hover:bg-orange-600 transition disabled:opacity-50"
       >
-        Show Deepfake Video
+        Make Avatar Video
       </button>
 
-      {/** Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-8 max-w-xl w-full text-center">
-            <h3 className="text-2xl font-bold text-blue-900 mb-4">🎬 Here's your deepfake video!</h3>
+          <div className="bg-white rounded-xl shadow-lg p-8 max-h-[90vh] w-full max-w-2xl overflow-y-auto text-center">
+            <h3 className="text-2xl font-bold text-blue-900 mb-4">🎬 Here’s your AI avatar!</h3>
 
-            {generatedVideo && (
-              <video controls autoPlay className="w-full rounded-lg shadow-md mb-4">
+            {/* Loading state with progress bar */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-10 w-full" aria-busy="true">
+                <p className="text-blue-800 font-medium text-lg mb-4">Making the avatar...</p>
+                <div className="w-3/4 max-w-md bg-gray-200 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-orange-500 h-4 rounded-full animate-progressFill"
+                    style={{ animationDuration: `${LOADING_MS}ms` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Video */}
+            {!loading && generatedVideo && (
+              <video
+                controls
+                autoPlay
+                className="w-full max-h-[60vh] rounded-lg shadow-md mb-4 object-contain"
+              >
                 <source src={generatedVideo} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             )}
 
-            <button
-              onClick={() => {
-                setShowModal(false);
-                if (onComplete) onComplete();
-              }}
-              className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded transition"
-            >
-              Next: Detective Mode
-            </button>
+            {/* Next button */}
+            {!loading && (
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  if (onComplete) onComplete();
+                }}
+                className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded transition"
+              >
+                Next: Detective Mode
+              </button>
+            )}
 
-            <p className="mt-6 text-sm text-blue-800">
-              <strong>Note for Kids:</strong> This is how a deepfake is created — just a face image and a voice clip.
-              Imagine how powerful (or dangerous) this can be if used to impersonate someone in real life!
-            </p>
+            {/* Kids note */}
+            {!loading && (
+              <p className="mt-6 text-sm text-blue-800">
+                <strong>Note:</strong> This shows how an AI avatar can be made from just a face image and a voice clip.
+                Talk about when it’s OK to use this technology—and when it isn’t.
+              </p>
+            )}
 
-            <button
-              onClick={reset}
-              className="mt-4 text-sm text-gray-500 hover:text-gray-700 underline"
-            >
-              Generate another
-            </button>
+            {/* Reset */}
+            {!loading && (
+              <button
+                onClick={reset}
+                className="mt-4 text-sm text-gray-500 hover:text-gray-700 underline"
+              >
+                Make another
+              </button>
+            )}
           </div>
         </div>
       )}

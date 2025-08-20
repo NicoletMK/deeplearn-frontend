@@ -67,12 +67,12 @@ export default function CreatorMode() {
 
       {/* Page title */}
       <h1 className="text-3xl font-bold text-center mb-2">
-        🎬Create Your DeepFake Video by Face Swapping🎭
+        🎬 Create Your DeepFake Video by Face Swapping 🎭
       </h1>
 
 
 <div className="mx-auto max-w-md bg-yellow-100 border-2 border-yellow-200 rounded-xl p-6 mb-6 text-left text-lg shadow-md">
-  🎭 Step 1: Pick a face from the Human or Fantasy options. <br />
+  👥 Step 1: Click a face from the Human or Fantasy options. <br />
   ⏳ Step 2: Wait until the face-swapped video appears. <br />
   🔍 Step 3: Press "▶ Play Both Videos" and compare them!
 </div>
