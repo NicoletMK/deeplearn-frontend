@@ -66,22 +66,24 @@ export default function CreatorMode() {
         </motion.div>
       )}
 
-      {/* Page title */}
-      <h1 className="text-3xl font-bold text-center mb-6">🎭 Create Your DeepFake Video!</h1>
+{/* Page title */}
+<h1 className="text-3xl font-bold text-center mb-2">
+  🎭 Create Your DeepFake Video by Face Swapping!
+</h1>
 
-      {/* Floating kid-friendly guide */}
-      <div className="fixed top-6 left-6 bg-white p-3 rounded-xl border-2 border-yellow-400 shadow-lg max-w-xs text-sm z-50">
-        🐣 Step 1: Pick a face! <br />
-        🐣 Step 2: Watch it appear in the video! <br />
-        🐣 Step 3: Press play and compare the videos! 🎉
-      </div>
+{/* Kid-friendly instructions */}
+<div className="mx-auto max-w-md bg-yellow-200 border-2 border-yellow-400 rounded-xl p-4 mb-6 text-center text-sm shadow-md">
+  🐣 Step 1: Pick a face from the Human or Fantasy options. <br />
+  🐣 Step 2: Wait until the face-swapped video appears. <br />
+  🐣 Step 3: Press "▶ Play Both Videos" and compare them! 🔍✨
+</div>
 
       {/* How-to popup */}
       {showPrompt && (
         <div className="fixed bottom-6 right-6 bg-white border-4 border-orange-400 shadow-lg p-4 rounded-xl z-50 max-w-xs text-left">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-lg font-bold text-orange-600 mb-1">🎬 How to Use</h2>
+              <h2 className="text-lg font-bold text-orange-600 mb-1"> How to Use</h2>
               <p className="text-sm text-gray-800">
                 Tap a human face or a fantasy face to apply it to the video. Try playing the original and your new video together to see the changes!
               </p>
